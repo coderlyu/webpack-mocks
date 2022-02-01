@@ -10,13 +10,16 @@ export default class FileSystem extends Watcher {
     mockDir: string
     fileRoute: FileRoute
     route: any
+    ready: boolean // 是否准备完毕
     constructor(options: Options, route: any) {
         super()
+        this.ready = false
         this.options = options
         this.route = route
         this.cacheFile = {}
         this.fileRoute = new Map<string, string>() // 存储已确定的文件路径
         this.mockDir = this.resolve(mockConfig.mockDirName) // mock 目录
+        this.route.mockDir = this.mockDir // 给 route 赋值 mock 文件夹的路径，用来计算请求地址的相对路径
         this.generateRoutes() // 初始化路由
         this.registerMonitor() // 注册监听回掉事件
     }
@@ -43,6 +46,9 @@ export default class FileSystem extends Watcher {
                 }
             }
             this.route.routes = this.fileRoute
+            this.route.cacheFile = this.cacheFile
+            this.route.generateRoutes() // 生成路由
+            this.ready = true
         }
     }
     resolve(filePath: string, userFolder: string = this.options.userFolder): string {
@@ -50,7 +56,7 @@ export default class FileSystem extends Watcher {
     }
     require(filePath: string): FileName {
         if (this.cacheFile[filePath]) return this.cacheFile[filePath]
-        // json, js 文件
+        // json, js, ts 文件
         const file = require(filePath)
         this.cacheFile[filePath] = file
         return file
@@ -88,7 +94,7 @@ export default class FileSystem extends Watcher {
         }
         let file: FileName = ''
         if (isInResolveOrder) {
-            //
+            // ts, js, json
             file = this.require(filePath)
         } else {
             file = this.readFile(filePath)
@@ -103,6 +109,10 @@ export default class FileSystem extends Watcher {
         // 注册监听文件变化的回掉事件
         this.on('change',  this.fileChange)
         this.on('rename', this.fileRename)
+
+        // 注册路由的监听事件
+        this.route.on('route-ready', this.routeReady)
+        this.route.on('')
     }
     fileChange(filename: string):  void {
         const filePath = this.resolve(mockConfig.mockDirName + path.sep + filename)
@@ -114,5 +124,9 @@ export default class FileSystem extends Watcher {
         this.fileRoute = new Map()
         this.generateRoutes() //! 暂时这么处理，后续完善路径对比
         this.emit('rename-after', filename) // TODO: 后续完善路径对比
+    }
+    routeReady() {
+        // route 路由准备完毕
+        this.emit('router-ready')
     }
 }

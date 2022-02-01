@@ -3,33 +3,50 @@ import { Context, Next } from 'koa'
 import Middleware from '../shared/middleware'
 import RouteFileProcess from './routeFileProcess'
 import { FileRoute, CacheFile } from '../index.d'
-export default class Route {
+import { EventEmitter } from 'events'
+import path from 'path'
+export default class Route extends EventEmitter {
     router: any
     methods = ['post', 'get', 'delete']
+    ready: boolean // 是否准备完毕
     constructor() {
+        super()
+        this.ready = false
         this.routes = new Map<string, string>()
         this.cacheFile = {}
-        this.router = new KoaRouter()
-        this.router.use(Middleware)
+        this.reset() // 初始化 router
     }
     use(app: any) {
+        if (!this.ready) return
         app
           .use(this.router.routes())
           .use(this.router.allowedMethods())
     }
     set routes(fileRoute: FileRoute) {
         this.routes = fileRoute
-        this.generateRoutes()
     }
     set cacheFile(cacheFile: CacheFile) {
         this.cacheFile = cacheFile
+    }
+    set mockDir(mockDir: string) {
+        this.mockDir = mockDir
     }
     generateRoutes() {
         this.routes.forEach((type, filePath) => {
             const process = new RouteFileProcess(filePath, this.cacheFile[filePath], type)
             this.methods.forEach((method) => {
-                this.router[method](filePath, process.handle) // 注册路由以及处理方法
+                this.router[method](this.relativePath(filePath), process.handle) // 注册路由以及处理方法
             })
         })
+        this.ready = true
+        this.emit('route-ready')
+    }
+    relativePath(filePath: string) {
+        const _path = path.relative(this.mockDir, filePath)
+        return _path.startsWith('/') ? _path : '/' + _path
+    }
+    reset() {
+        this.router = new KoaRouter()
+        this.router.use(Middleware)
     }
 }

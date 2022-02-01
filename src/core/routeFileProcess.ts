@@ -1,5 +1,6 @@
 import { FileName } from '../index.d'
 import { Context, Next } from 'koa'
+import TsFileCompiler from './tsFileCompiler'
 export default class RouteFileProcess {
     path: string
     file: FileName
@@ -31,6 +32,8 @@ export default class RouteFileProcess {
     }
     tsProcess(ctx: Context, next: Next) {
         // ts 
+        const _result = new TsFileCompiler(this.path)
+        ctx.res.end(_result.data)
     }
     htmlProcess(ctx: Context, next: Next) {
        // TODO: html 暂不做 
