@@ -1,6 +1,6 @@
 import fs from 'fs'
 import { EventEmitter } from 'events'
-export default abstract class Watcher extends EventEmitter {
+export default abstract class FileWatch extends EventEmitter {
     abstract mockDir: string
     constructor() {
         super()

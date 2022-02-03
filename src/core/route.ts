@@ -1,7 +1,7 @@
 import KoaRouter from 'koa-router'
 import { Context, Next } from 'koa'
 import Middleware from '../shared/middleware'
-import RouteFileProcess from './routeFileProcess'
+import RouteFileProcess from './route-file-process'
 import { FileRoute, CacheFile } from '../index.d'
 import { EventEmitter } from 'events'
 import path from 'path'

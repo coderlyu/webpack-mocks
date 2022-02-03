@@ -1,6 +1,6 @@
 import { FileName } from '../index.d'
 import { Context, Next } from 'koa'
-import TsFileCompiler from './tsFileCompiler'
+import TsFileCompiler from './ts-file-compile'
 export default class RouteFileProcess {
     path: string
     file: FileName

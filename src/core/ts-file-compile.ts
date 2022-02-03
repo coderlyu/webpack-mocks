@@ -1,6 +1,6 @@
 
 
-export default class TsFileCompiler {
+export default class TsFileCompile {
     data: any
     filePath: string
     constructor(filePath: string) {
@@ -8,6 +8,6 @@ export default class TsFileCompiler {
         this.filePath = filePath
     }
     compiler() {
-        
+
     }
 }

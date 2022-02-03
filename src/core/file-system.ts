@@ -1,9 +1,9 @@
 import { Options, CacheFile, FileRoute, FileName } from '../index.d'
-import Watcher from './watcher'
+import fileWatch from './file-watch'
 import path from 'path'
 import fs from 'fs'
 import mockConfig from '../../mock.config'
-export default class FileSystem extends Watcher {
+export default class FileSystem extends fileWatch {
     options: Options
     cacheFile: CacheFile
     resolveOrder =  ['json', 'js', 'ts']
