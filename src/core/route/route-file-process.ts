@@ -1,26 +1,23 @@
-import { FileName } from '../../index.d'
 import { Context, Next } from 'koa'
+import { FileModule } from '../file/file-module'
 export default class RouteFileProcess {
-    path: string
-    file: FileName
+    module: FileModule
     compile: any
-    constructor(tsCompile: any, path: string, file: FileName, type: string = 'js') {
+    constructor(tsCompile: any, module: FileModule) {
         this.compile = tsCompile
-        this.path = path
-        this.file = file
-        this.handle(type)
+        this.module = module
     }
-    handle(type: string) {
+    handle(ctx: Context, next: Next) {
         const error = () => {}
-        switch (type) {
+        switch (this.module.type) {
             case 'ts':
-                return this.tsProcess
+                return this.tsProcess(ctx, next)
             case 'js':
-                return this.jsProcess
+                return this.jsProcess(ctx, next)
             case 'json':
-                return this.jsonProcess
+                return this.jsonProcess(ctx, next)
             case 'html':
-                return this.htmlProcess
+                return this.htmlProcess(ctx, next)
             default: 
                 return error
         }
@@ -33,7 +30,7 @@ export default class RouteFileProcess {
     }
     tsProcess(ctx: Context, next: Next) {
         // ts 
-        const _result = this.compile.compiler(this.path)
+        const _result = this.compile.compiler(this.module.path)
         ctx.res.end(_result.data)
     }
     htmlProcess(ctx: Context, next: Next) {

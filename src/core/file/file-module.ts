@@ -1,53 +1,91 @@
-
-
-class FileModule {
-    readonly path: string // 绝对路径
-    readonly relativePath: string // 相对路径，相对 mock 文件夹的路径
-    file: any // 字符串 或者 require 
-    readonly type: string // 文件类型，例如：js, ts, json 等等...
+import Path from './path'
+export class FileModule {
+    private readonly _path: string // 绝对路径
+    private readonly _relativePath: string // 相对路径，相对 mock 文件夹的路径
+    private _file: any // 字符串 或者 require 
+    private _type: string // 文件类型，例如：js, ts, json 等等...
     constructor(path: string, file: any, type: string, relativePath: string) {
-        this.path = path
-        this.file = file
-        this.type = type
-        this.relativePath = relativePath
+        this._path = path
+        this._file = file
+        this._type = type
+        this._relativePath = relativePath
     }
     static isFileModule(module: any) {
         return module instanceof FileModule
     }
     set(file: any) {
-        this.file = file
+        this._file = file
+    }
+    setType(type: string) {
+        this._type = type
+    }
+    get type() {
+        return this._type
+    }
+    get file() {
+        return this._file
+    }
+    get path() {
+        return this._path
+    }
+    get relativePath() {
+        return this._relativePath
     }
 }
 
-export default class Module {
-    fileModules: any // 绝对地址 -> 文件
+export default class Module extends Path {
+    fileModules: Map<string, FileModule> // 绝对地址 -> 文件
     relativeMap: any // 相对地址与绝对地址之间的映射关系
     constructor() {
-        this.fileModules = new Map()
+        super()
+        this.fileModules = new Map<string, FileModule>()
         this.relativeMap = {}
     }
     add(path: string, file: any, relativePath: string, type: string = 'js') {
-        const _file = new FileModule(path, file, relativePath, type)
-        this.fileModules.set(path, _file)
+        const module = new FileModule(path, file, relativePath, type)
+        this.fileModules.set(path, module)
         this.relativeMap[path] = relativePath
         this.relativeMap[relativePath] = path
     }
-    get(path: string) {
+    get(path: string): FileModule | undefined {
         if (this.isRelativePath(path)) {
             // 通过相对路径查找
             return this.fileModules.get(this.relativeMap[this.relativePathFix(path)])
         }
         return this.fileModules.get(path)
     }
+    has(path: string): boolean {
+        return this.get(path) ? true : false
+    }
     set(path: string, file: any) {
-        let _file: FileModule | undefined
+        // file 是 FileModule 实例
+        if (FileModule.isFileModule(file)) {
+            // 仅覆盖 Map
+            let absPath = path
+            if (this.isRelativePath(path)) absPath = this.relativeMap[this.relativePathFix(path)]
+            this.fileModules.set(absPath, file)
+        } else {
+            // 修改文件
+            let module: FileModule | undefined
+            if (this.isRelativePath(path)) {
+                // 通过相对路径查找
+                module = this.fileModules.get(this.relativeMap[this.relativePathFix(path)])
+            } else module = this.fileModules.get(path)
+            if (module && FileModule.isFileModule(module)) {
+                module.set(file)
+            }
+        }
+    }
+    setType(path: string, type: string) {
+        let module
         if (this.isRelativePath(path)) {
-            // 通过相对路径查找
-            _file = this.fileModules.get(this.relativeMap[this.relativePathFix(path)])
-        } else _file = this.fileModules.get(path)
-
-        if (_file) {
-            _file.set(file)
+            //  相对路径
+            module = this.fileModules.get(this.relativeMap[this.relativePathFix(path)])
+        } else {
+            module = this.fileModules.get(path)
+        }
+        if (FileModule.isFileModule(module)) {
+            module?.setType(type)
         }
     }
     del(path: string) {
@@ -68,20 +106,17 @@ export default class Module {
         }
     }
     /**
+     * 清空数据
+     */
+    clear() {
+        this.fileModules = new Map()
+        this.relativeMap = {}
+    }
+    /**
      * 返回 相对路径组成的 数组，用户生成 route
      */
     keys() {
         return Object.keys(this.relativeMap).filter(_ => this.isRelativePath(_))
     }
-    isRelativePath(path: string) {
-        return path.startsWith('.') || path.startsWith('/')
-    }
-    /**
-     * 修复相对路径
-     * @param path 
-     * @returns 
-     */
-    relativePathFix(path: string) {
-        return path.replace(/^(\.+\/)+/g, '/')
-    }
+
 }

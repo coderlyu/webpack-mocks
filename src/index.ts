@@ -6,6 +6,7 @@ import portfinder from 'portfinder'
 import Log from './shared/log'
 import FileSystem from './core/file/file-system'
 import Route from './core/route/route'
+import Module from './core/file/file-module'
 export default class VMock extends Log {
     options: Options
     app: any
@@ -13,14 +14,16 @@ export default class VMock extends Log {
     route: any
     serverOptions: ServerOptions
     ready = false
+    modules: Module
     constructor(options: Options, serverOptions: ServerOptions) {
         super()
-        this.route = new Route()
-        this.fileSystem = new FileSystem(options, this.route)
+        this.modules = new Module()
+        this.route = new Route(this.modules)
+        this.fileSystem = new FileSystem(options, this.route, this.modules)
         this.options = Object.assign({}, mockConfig.defaultServerConfig, options)
         this.serverOptions = Object.assign({}, serverOptions, mockConfig.defaultServerConfig)
     }
-    init() {
+    create() {
         // 前
         this.beforeCreateServer()
         // 中
