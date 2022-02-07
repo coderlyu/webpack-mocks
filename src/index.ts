@@ -15,7 +15,7 @@ export default class VMock extends Log {
     serverOptions: ServerOptions
     ready = false
     modules: Module
-    constructor(options: Options, serverOptions: ServerOptions) {
+    constructor(options: Options, serverOptions?: ServerOptions) {
         super()
         this.modules = new Module()
         this.route = new Route(this.modules)
