@@ -7,6 +7,7 @@ export default abstract class Log {
   abstract options: Options
   constructor(saveFile = false) {
       if (saveFile) {
+        // TODO 保存为本地输出文件，待完善
         log4js.configure({
             appenders: { cheese: { type: "file", filename: "cheese.log" } },
             categories: { default: { appenders: ["cheese"], level: "error" } },

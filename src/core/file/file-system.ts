@@ -1,8 +1,8 @@
-import { Options, CacheFile, FileRoute, FileName } from '../index.d'
+import { Options, CacheFile, FileRoute, FileName } from '../../index.d'
 import fileWatch from './file-watch'
 import path from 'path'
 import fs from 'fs'
-import mockConfig from '../../mock.config'
+import mockConfig from '../../../mock.config'
 export default class FileSystem extends fileWatch {
     options: Options
     cacheFile: CacheFile

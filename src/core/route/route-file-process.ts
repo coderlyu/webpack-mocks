@@ -1,10 +1,11 @@
-import { FileName } from '../index.d'
+import { FileName } from '../../index.d'
 import { Context, Next } from 'koa'
-import TsFileCompiler from './ts-file-compile'
 export default class RouteFileProcess {
     path: string
     file: FileName
-    constructor(path: string, file: FileName, type: string = 'js') {
+    compile: any
+    constructor(tsCompile: any, path: string, file: FileName, type: string = 'js') {
+        this.compile = tsCompile
         this.path = path
         this.file = file
         this.handle(type)
@@ -32,7 +33,7 @@ export default class RouteFileProcess {
     }
     tsProcess(ctx: Context, next: Next) {
         // ts 
-        const _result = new TsFileCompiler(this.path)
+        const _result = this.compile.compiler(this.path)
         ctx.res.end(_result.data)
     }
     htmlProcess(ctx: Context, next: Next) {

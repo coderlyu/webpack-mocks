@@ -1,19 +1,22 @@
 import KoaRouter from 'koa-router'
 import { Context, Next } from 'koa'
-import Middleware from '../shared/middleware'
+import Middleware from '../../shared/middleware'
 import RouteFileProcess from './route-file-process'
-import { FileRoute, CacheFile } from '../index.d'
+import { FileRoute, CacheFile } from '../../index.d'
 import { EventEmitter } from 'events'
 import path from 'path'
+import TsFileCompile from '../compile/ts-file-compile'
 export default class Route extends EventEmitter {
     router: any
     methods = ['post', 'get', 'delete']
     ready: boolean // 是否准备完毕
+    compile: any
     constructor() {
         super()
         this.ready = false
         this.routes = new Map<string, string>()
         this.cacheFile = {}
+        this.compile = new TsFileCompile()
         this.reset() // 初始化 router
     }
     use(app: any) {
@@ -33,7 +36,7 @@ export default class Route extends EventEmitter {
     }
     generateRoutes() {
         this.routes.forEach((type, filePath) => {
-            const process = new RouteFileProcess(filePath, this.cacheFile[filePath], type)
+            const process = new RouteFileProcess(this.compile, filePath, this.cacheFile[filePath], type)
             this.methods.forEach((method) => {
                 this.router[method](this.relativePath(filePath), process.handle) // 注册路由以及处理方法
             })

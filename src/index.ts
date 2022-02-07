@@ -4,8 +4,8 @@ import KoaCros from 'koa2-cors'
 import mockConfig from '../mock.config'
 import portfinder from 'portfinder'
 import Log from './shared/log'
-import FileSystem from './core/file-system'
-import Route from './core/route'
+import FileSystem from './core/file/file-system'
+import Route from './core/route/route'
 export default class VMock extends Log {
     options: Options
     app: any
