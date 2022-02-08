@@ -2,7 +2,7 @@ import { Options } from '../../index.d'
 import FileWatch from './file-watch'
 import path from 'path'
 import fs from 'fs'
-import mockConfig from '../../../mock.config'
+import mockConfig from '../../config'
 import Module, { FileModule } from './file-module'
 import Path from './path'
 

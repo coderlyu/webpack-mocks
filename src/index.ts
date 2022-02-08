@@ -1,7 +1,7 @@
 import { Options,ServerOptions } from './index.d'
-import koa, { Context } from 'koa'
+import koa from 'koa'
 import KoaCros from 'koa2-cors'
-import mockConfig from '../mock.config'
+import mockConfig from './config'
 import portfinder from 'portfinder'
 import Log from './shared/log'
 import FileSystem from './core/file/file-system'
@@ -75,12 +75,3 @@ export default class VMock extends Log {
         this.route.use(this.app)
     }
 }
-
-let vmock = new VMock({
-    userFolder: process.cwd(),
-    srcFolder: 'string',
-    buildFolder: 'string',
-    currentEnv: 'string',
-})
-
-vmock.server()
