@@ -16,7 +16,8 @@
     "start": "tsc dist/index.ts",
     "dev": "nodemon --watch src -e ts,tsx --exec ts-node src/index.ts",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -w -r 0",
-    "commit": "git-cz"
+    "commit": "git-cz",
+    "commit:husky": "echo \"commit:husky\" "
   },
   "author": "",
   "license": "ISC",
@@ -29,6 +30,7 @@
     "commitizen": "^4.2.4",
     "conventional-changelog-cli": "^2.2.2",
     "cz-conventional-changelog": "^3.3.0",
+    "husky": "^7.0.4",
     "lint-staged": "^12.3.3",
     "lodash.camelcase": "^4.3.0",
     "nodemon": "^2.0.15",
@@ -63,5 +65,10 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
   }
 }
