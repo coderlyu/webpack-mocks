@@ -6,7 +6,7 @@ export default class Path {
      * @returns 
      */
     isRelativePath(path: string) {
-        return path.startsWith('.') || path.startsWith('/')
+        return path.startsWith('.') || !path.startsWith('/')
     }
     /**
      * 修复相对路径
@@ -14,7 +14,7 @@ export default class Path {
      * @returns 
      */
     relativePathFix(path: string) {
-        return path.replace(/^(\.+\/)+/g, '/')
+        return path.replace(/^(\.+\/)+/g, '')
     }
     /**
      * 获取绝对路径
@@ -25,5 +25,8 @@ export default class Path {
     absolutePath(_path: string, prefix: string) {
         if (!this.isRelativePath(_path)) return _path
         return path.resolve(prefix, _path)
+    }
+    relativePath(_path: string, fullPath: string) {
+        
     }
 }

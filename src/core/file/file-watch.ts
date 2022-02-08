@@ -4,7 +4,6 @@ export default abstract class FileWatch extends EventEmitter {
     abstract mockDir: string
     constructor() {
         super()
-        this.watch()
     }
     watch() {
         fs.watch(this.mockDir, { recursive: true }, (type, filename) => {

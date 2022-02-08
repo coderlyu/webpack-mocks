@@ -3,7 +3,8 @@ import Middleware from '../../shared/middleware'
 import RouteFileProcess from './route-file-process'
 import { EventEmitter } from 'events'
 import TsFileCompile from '../compile/ts-file-compile'
-import Module from '../file/file-module'
+import Module, { FileModule } from '../file/file-module'
+import { Context, Next } from 'koa'
 export default class Route extends EventEmitter {
     router: any
     methods = ['post', 'get', 'delete']
@@ -30,7 +31,7 @@ export default class Route extends EventEmitter {
             if (module) {
                 const process = new RouteFileProcess(this.compile, module)
                 this.methods.forEach((method) => {
-                    this.router[method](module.relativePath, process.handle) // 注册路由以及处理方法
+                    this.router[method](this.routerPath(module), async (ctx: Context, next: Next) => await process.handle(ctx, next)) // 注册路由以及处理方法
                 })
             }
         })
@@ -40,5 +41,8 @@ export default class Route extends EventEmitter {
     reset() {
         this.router = new KoaRouter()
         this.router.use(Middleware)
+    }
+    routerPath(module: FileModule) {
+        return '/' + module.relativePath
     }
 }

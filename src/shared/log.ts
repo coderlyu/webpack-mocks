@@ -20,6 +20,7 @@ export default abstract class Log {
     this.logger.debug(message);
   }
   info(message: string) {
+    console.log(message)
     this.logger.info(message);
   }
   warn(message: string) {

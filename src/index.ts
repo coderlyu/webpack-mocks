@@ -17,23 +17,25 @@ export default class VMock extends Log {
     modules: Module
     constructor(options: Options, serverOptions?: ServerOptions) {
         super()
-        this.modules = new Module()
-        this.route = new Route(this.modules)
-        this.fileSystem = new FileSystem(options, this.route, this.modules)
+        this.modules = new Module() // 文件模块，route 和 fileSystem 共用的数据
+        this.route = new Route(this.modules) // 生成路由
+        this.fileSystem = new FileSystem(options, this.route, this.modules) // 操作 mock 文件
         this.options = Object.assign({}, mockConfig.defaultServerConfig, options)
         this.serverOptions = Object.assign({}, serverOptions, mockConfig.defaultServerConfig)
-    }
-    create() {
-        // 前
         this.beforeCreateServer()
+    }
+    server() {
+        this.fileSystem.generateRoutes() // 初始化路由
         // 中
-        this.getValidPort().then(this.createServer)
+        this.getValidPort().then(() => this.createServer())
         // 后
         this.afterCreateServer()
     }
     beforeCreateServer() {
         // 路由注册完毕，可以绑定到 app 上
-        this.fileSystem.on('router-ready', this.routerReady)
+        this.fileSystem.on('router-ready', () => {
+            this.routerReady()
+        })
 
         // 文件变化
         this.fileSystem.on('change-after', this.afterFileChange)
@@ -42,7 +44,9 @@ export default class VMock extends Log {
     createServer() {
         this.app = new koa()
         this.app.use(KoaCros(mockConfig.corsHandler))
-        this.app.listen(this.options.port || 7000)
+        this.app.listen(this.serverOptions.port)
+        this.routerReady()
+        this.info(`The server is running at http://localhost:${this.serverOptions.port}`)
     }
     afterCreateServer() {
 
@@ -67,6 +71,16 @@ export default class VMock extends Log {
     }
     routerReady() {
         // 路由注册完毕，可以绑定到 app 上
+        console.log('ready router')
         this.route.use(this.app)
     }
 }
+
+let vmock = new VMock({
+    userFolder: process.cwd(),
+    srcFolder: 'string',
+    buildFolder: 'string',
+    currentEnv: 'string',
+})
+
+vmock.server()

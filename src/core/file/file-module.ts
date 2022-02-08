@@ -4,7 +4,7 @@ export class FileModule {
     private readonly _relativePath: string // 相对路径，相对 mock 文件夹的路径
     private _file: any // 字符串 或者 require 
     private _type: string // 文件类型，例如：js, ts, json 等等...
-    constructor(path: string, file: any, type: string, relativePath: string) {
+    constructor(path: string, file: any, relativePath: string, type: string) {
         this._path = path
         this._file = file
         this._type = type
@@ -39,7 +39,7 @@ export default class Module extends Path {
     constructor() {
         super()
         this.fileModules = new Map<string, FileModule>()
-        this.relativeMap = {}
+        this.relativeMap = {} // /use/index.json -> user/index.json
     }
     add(path: string, file: any, relativePath: string, type: string = 'js') {
         const module = new FileModule(path, file, relativePath, type)
@@ -116,7 +116,8 @@ export default class Module extends Path {
      * 返回 相对路径组成的 数组，用户生成 route
      */
     keys() {
-        return Object.keys(this.relativeMap).filter(_ => this.isRelativePath(_))
+        const _arr = Array.from(this.fileModules.keys())
+        return Object.keys(this.relativeMap).filter(_ => !_arr.includes(_))
     }
 
 }

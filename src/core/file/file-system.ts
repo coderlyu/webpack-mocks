@@ -18,29 +18,22 @@ export default class FileSystem extends FileWatch implements Path {
         this.route = route
         this.modules = modules // 缓存的模块
         this.mockDir = this.resolve(mockConfig.mockDirName) // mock 目录
-        this.generateRoutes() // 初始化路由
         this.registerMonitor() // 注册监听回掉事件
+        this.watch() // 监听文件
     }
-    generateRoutes(isCover = false): void {
+    generateRoutes(): void {
         if (this.options.userFolder && this.isDir(this.mockDir)) {
             if (!this.isExistsFile(this.mockDir)) return
-            let dirs = fs.readdirSync(this.mockDir).map((p) => this.resolve(p))
+            let dirs = fs.readdirSync(this.mockDir).map((p) => this.resolve(p, this.mockDir))
             while(dirs.length > 0) {
-                let file = dirs.shift()
-                if (!file) continue
-                if (this.isDir(file)) {
+                let _path = dirs.shift()
+                if (!_path) continue
+                if (this.isDir(_path)) {
                     // 是文件夹
-                    dirs = dirs.concat(fs.readdirSync(file).map((p) => this.resolve(p, file)))
+                    dirs = dirs.concat(fs.readdirSync(_path).map((p) => this.resolve(p, _path)))
                 } else {
                     // 是文件
-                    const { path, type, module } = this.readFileByOrder(file)
-                    if (isCover) {
-                        // 覆盖原有文件
-                        this.modules.set(path, module)
-                    } else {
-                        // 仅修改 type 类型
-                        this.modules.setType(path, type)
-                    }
+                    this.readFileByOrder(_path) // 读取文件并缓存
                 }
             }
             this.route.generateRoutes() // 生成路由
@@ -52,8 +45,8 @@ export default class FileSystem extends FileWatch implements Path {
     require(filePath: string, type: string): FileModule | undefined {
         if (this.modules.has(filePath)) return this.modules.get(filePath)
         // json, js, ts 文件
-        const file = require(filePath)
-        this.modules.add(filePath, file, this.absolutePath(filePath), type)
+        const file = require(filePath + '.' + type)
+        this.modules.add(filePath, file, this.relativePath(filePath), type)
         return this.modules.get(filePath)
     }
     isDir(filePath: string): boolean {
@@ -66,8 +59,8 @@ export default class FileSystem extends FileWatch implements Path {
     readFile(filePath: string, type: string): FileModule | undefined {
         // 其他文件类型
         if (this.modules.has(filePath)) return this.modules.get(filePath)
-        const file = fs.readFileSync(filePath).toString()
-        this.modules.add(filePath, file, this.absolutePath(filePath), type)
+        const file = fs.readFileSync(filePath + '.' + type).toString()
+        this.modules.add(filePath, file, this.relativePath(filePath), type)
         return this.modules.get(filePath)
     }
     readFileByOrder(filePath: string): { type: string, path: string, module: FileModule | undefined } {
@@ -81,7 +74,7 @@ export default class FileSystem extends FileWatch implements Path {
         for(let i = 0; i < this.resolveOrder.length; i++) {
             let _filePath = `${filePath}.${this.resolveOrder[i]}`
             if (this.isExistsFile(_filePath)) {
-                filePath = _filePath
+                // filePath = _filePath
                 fileType = this.resolveOrder[i]
                 isInResolveOrder = true
                 break
@@ -107,12 +100,13 @@ export default class FileSystem extends FileWatch implements Path {
 
         // 注册路由的监听事件
         this.route.on('route-ready', this.routeReady)
-        this.route.on('')
+        // this.route.on('')
     }
     fileChange(filename: string):  void {
         const filePath = this.resolve(mockConfig.mockDirName + path.sep + filename)
         const { path: _filePath, module } = this.readFileByOrder(filePath)
         this.modules.set(_filePath, module)
+        console.log('file change')
         this.emit('change-after', filename)
     }
     fileRename(filename: string): void {
@@ -121,6 +115,7 @@ export default class FileSystem extends FileWatch implements Path {
         this.emit('rename-after', filename) // TODO: 后续完善路径对比
     }
     routeReady() {
+        console.log('system router')
         // route 路由准备完毕
         this.emit('router-ready')
     }
@@ -130,7 +125,7 @@ export default class FileSystem extends FileWatch implements Path {
      * @returns 
      */
     isRelativePath(path: string) {
-        return path.startsWith('.') || path.startsWith('/')
+        return path.startsWith('.') || !path.startsWith('/')
     }
     /**
      * 修复相对路径
@@ -138,7 +133,7 @@ export default class FileSystem extends FileWatch implements Path {
      * @returns 
      */
     relativePathFix(path: string) {
-        return path.replace(/^(\.+\/)+/g, '/')
+        return path.replace(/^(\.+\/)+/g, '')
     }
     /**
      * 获取绝对路径
@@ -149,5 +144,8 @@ export default class FileSystem extends FileWatch implements Path {
     absolutePath(_path: string, prefix: string = this.mockDir) {
         if (!this.isRelativePath(_path)) return _path
         return path.resolve(prefix, _path)
+    }
+    relativePath(_path: string) {
+        return this.relativePathFix(path.relative(this.mockDir, _path))
     }
 }

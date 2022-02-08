@@ -7,23 +7,26 @@ export default class RouteFileProcess {
         this.compile = tsCompile
         this.module = module
     }
-    handle(ctx: Context, next: Next) {
+    async handle(ctx: Context, next: Next) {
         const error = () => {}
         switch (this.module.type) {
             case 'ts':
-                return this.tsProcess(ctx, next)
+                return await this.tsProcess(ctx, next)
             case 'js':
-                return this.jsProcess(ctx, next)
+                return await this.jsProcess(ctx, next)
             case 'json':
-                return this.jsonProcess(ctx, next)
+                return await this.jsonProcess(ctx, next)
             case 'html':
-                return this.htmlProcess(ctx, next)
+                return await this.htmlProcess(ctx, next)
             default: 
                 return error
         }
     }
     jsonProcess(ctx: Context, next: Next) {
         // json
+        let data = JSON.stringify(this.module.file)
+        ctx.res.end(data, 'utf8')
+        next()
     }
     jsProcess(ctx: Context, next: Next) {
         // 处理 js 文件
