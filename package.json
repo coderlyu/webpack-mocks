@@ -9,20 +9,31 @@
     "dist"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "prebuild": "rimraf dist",
+    "precommit": "lint-staged",
     "tsc": "tsc --module commonjs",
     "build": "rollup -c rollup.config.ts",
     "start": "tsc dist/index.ts",
-    "dev": "nodemon --watch src -e ts,tsx --exec ts-node src/index.ts"
+    "dev": "nodemon --watch src -e ts,tsx --exec ts-node src/index.ts",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -w -r 0",
+    "commit": "git-cz"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@commitlint/cli": "^16.1.0",
+    "@commitlint/config-conventional": "^16.0.0",
     "@types/koa": "^2.13.4",
     "@types/koa-router": "^7.4.4",
     "@types/koa2-cors": "^2.0.2",
+    "commitizen": "^4.2.4",
+    "conventional-changelog-cli": "^2.2.2",
+    "cz-conventional-changelog": "^3.3.0",
+    "lint-staged": "^12.3.3",
     "lodash.camelcase": "^4.3.0",
     "nodemon": "^2.0.15",
+    "prettier": "^2.5.1",
+    "rimraf": "^3.0.2",
     "rollup": "^2.67.1",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-json": "^4.0.0",
@@ -41,5 +52,16 @@
     "log4js": "^6.4.1",
     "portfinder": "^1.0.28",
     "typescript-json-schema": "^0.53.0"
+  },
+  "lint-staged": {
+    "{src,test}/**/*.ts": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
