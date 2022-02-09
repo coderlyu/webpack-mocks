@@ -9,14 +9,14 @@
     "dist"
   ],
   "scripts": {
+    "prepare": "husky install",
     "prebuild": "rimraf dist",
     "tsc": "tsc --module commonjs",
     "build": "rollup -c rollup.config.ts",
     "start": "tsc dist/index.ts",
     "dev": "nodemon --watch src -e ts,tsx --exec ts-node src/index.ts",
-    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -w -r 0",
-    "commit": "git-cz",
-    "prepare": "husky install"
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
+    "commit": "git-cz"
   },
   "author": "",
   "license": "ISC",
