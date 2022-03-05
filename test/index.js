@@ -1,10 +1,8 @@
-const VMock = require('../dist/index.umd.js')
+// const VMock = require('../dist/index.umd.js')
 
-let vmock = new VMock({
-    userFolder: process.cwd(),
-    srcFolder: 'string',
-    buildFolder: 'string',
-    currentEnv: 'string',
-})
+// let vmock = new VMock({
+//     userFolder: process.cwd()
+// })
 
-vmock.server()
+// vmock.server()
+console.log(process.argv.slice(2))

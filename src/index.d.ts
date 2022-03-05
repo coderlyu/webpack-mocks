@@ -1,20 +1,17 @@
 export interface Options {
-    userFolder: string,
-    srcFolder?: string,
-    buildFolder?: string,
-    currentEnv: string,
-    [prop: string]: any
+  userFolder: string; // 项目运行目录，一般为 process.cwd()
+  [prop: string]: any;
 }
 
 export interface ServerOptions {
-    port: number,
-    headers: any
+  port: number;
+  headers: any;
 }
 
-export type FileName = string | File
+export type FileName = string | File;
 
 export interface CacheFile {
-    [prop: string]: FileName
+  [prop: string]: FileName;
 }
 
-export type FileRoute  = Map<string, string>
+export type FileRoute = Map<string, string>;
