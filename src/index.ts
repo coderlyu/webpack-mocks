@@ -3,11 +3,12 @@ import koa from 'koa';
 import KoaCros from 'koa2-cors';
 import mockConfig from './config';
 import portfinder from 'portfinder';
-import Log from './shared/log';
+// import Log from './shared/log';
 import FileSystem from './core/file/file-system';
 import Route from './core/route/route';
 import Module from './core/file/file-module';
-export default class VMock extends Log {
+// extends Log
+export default class VMock {
   options: Options;
   app: any;
   fileSystem: any;
@@ -15,8 +16,10 @@ export default class VMock extends Log {
   serverOptions: ServerOptions;
   ready = false;
   modules: Module;
+  env: Array<string> = [];
   constructor(options: Options, serverOptions?: ServerOptions) {
-    super();
+    // super();
+    this.getEnvType();
     this.modules = new Module(); // 文件模块，route 和 fileSystem 共用的数据
     this.route = new Route(this.modules); // 生成路由
     this.fileSystem = new FileSystem(options, this.route, this.modules); // 操作 mock 文件
@@ -32,7 +35,7 @@ export default class VMock extends Log {
     this.afterCreateServer();
   }
   beforeCreateServer() {
-    this.info(`beforeCreateServer`);
+    // this.info(`beforeCreateServer`);
     // 路由注册完毕，可以绑定到 app 上
     this.fileSystem.on('router-ready', () => {
       this.routerReady();
@@ -43,16 +46,16 @@ export default class VMock extends Log {
     this.fileSystem.on('rename-after', this.afterFileRename);
   }
   createServer() {
-    this.info(`createServer`);
+    // this.info(`createServer`);
     this.app = new koa();
     this.app.use(KoaCros(mockConfig.corsHandler));
     this.app.listen(this.serverOptions.port);
     this.routerReady();
     console.log(`The server is running at http://localhost:${this.serverOptions.port}`);
-    this.info(`The server is running at http://localhost:${this.serverOptions.port}`);
+    // this.info(`The server is running at http://localhost:${this.serverOptions.port}`);
   }
   afterCreateServer() {
-    this.info(`afterCreateServer`);
+    // this.info(`afterCreateServer`);
   }
   getValidPort() {
     portfinder.basePort = this.serverOptions.port;
@@ -79,6 +82,12 @@ export default class VMock extends Log {
     // 路由注册完毕，可以绑定到 app 上
     console.log('ready router');
     this.route.use(this.app);
+  }
+  getEnvType() {
+    // 获取运行环境
+    const args = process.argv.slice(2);
+    console.log('环境参数', args);
+    this.env = args;
   }
 }
 

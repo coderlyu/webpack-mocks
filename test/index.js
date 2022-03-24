@@ -1,8 +1,9 @@
-// const VMock = require('../dist/index.umd.js')
+const VMock = require('../dist/index.umd.js');
+const { faker } = require('@faker-js/faker');
+const jsf = require('json-schema-faker');
 
-// let vmock = new VMock({
-//     userFolder: process.cwd()
-// })
+let vmock = new VMock({
+  userFolder: process.cwd(),
+});
 
-// vmock.server()
-console.log(process.argv.slice(2))
+vmock.server();

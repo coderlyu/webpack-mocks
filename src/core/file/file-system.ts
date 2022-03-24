@@ -12,6 +12,7 @@ export default class FileSystem extends FileWatch implements Path {
   mockDir: string;
   route: any;
   modules: Module;
+  vbuildConfig: any;
   constructor(options: Options, route: any, modules: Module) {
     super();
     this.options = options;
@@ -20,6 +21,9 @@ export default class FileSystem extends FileWatch implements Path {
     this.mockDir = this.resolve(mockConfig.mockDirName); // mock 目录
     this.registerMonitor(); // 注册监听回掉事件
     this.watch(); // 监听文件
+  }
+  getRunningConfig() {
+    // 获取配置文件
   }
   generateRoutes(): void {
     if (this.options.userFolder && this.isDir(this.mockDir)) {

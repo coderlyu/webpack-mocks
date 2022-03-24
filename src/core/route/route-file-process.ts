@@ -38,9 +38,17 @@ export default class RouteFileProcess {
     this.module.file.replace(reg, (...args: Array<string>) => {
       type = args[3];
     });
+
+    // 别的处理
+    const faceReg = /\s?interface\s?/g;
+    if (faceReg.test(type)) type = type.replace(faceReg, '');
+    if (/\{/g.test(type)) type = type.replace(/\{/g, '');
+    type = type.trim();
+    if (type.endsWith(';')) type = type.replace(';', '');
     if (!type) {
       ctx.res.end('出错了哦');
     }
+    console.log('类型', type);
     const _result = await this.compile.compiler(this.module.path, type);
     ctx.res.end(_result.data);
   }
