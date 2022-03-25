@@ -2,21 +2,25 @@ import { Options, ServerOptions } from './index.d';
 import koa from 'koa';
 import KoaCros from 'koa2-cors';
 import mockConfig from './config';
-import portfinder from 'portfinder';
 // import Log from './shared/log';
 import FileSystem from './core/file/file-system';
 import Route from './core/route/route';
 import Module from './core/file/file-module';
+import { getFreePort } from './shared/index';
+import minimist from 'minimist';
+import fse from 'fs-extra';
+import path from 'path';
 // extends Log
 export default class VMock {
   options: Options;
-  app: any;
+  app: koa | undefined;
   fileSystem: any;
   route: any;
   serverOptions: ServerOptions;
   ready = false;
   modules: Module;
-  env: Array<string> = [];
+  argvs = {};
+  vbuilderConfig: Object | undefined;
   constructor(options: Options, serverOptions?: ServerOptions) {
     // super();
     this.getEnvType();
@@ -30,9 +34,7 @@ export default class VMock {
   server() {
     this.fileSystem.generateRoutes(); // 初始化路由
     // 中
-    this.getValidPort().then(() => this.createServer());
-    // 后
-    this.afterCreateServer();
+    getFreePort(this.serverOptions.port).then(() => this.createServer());
   }
   beforeCreateServer() {
     // this.info(`beforeCreateServer`);
@@ -53,21 +55,10 @@ export default class VMock {
     this.routerReady();
     console.log(`The server is running at http://localhost:${this.serverOptions.port}`);
     // this.info(`The server is running at http://localhost:${this.serverOptions.port}`);
+    this.afterCreateServer();
   }
   afterCreateServer() {
     // this.info(`afterCreateServer`);
-  }
-  getValidPort() {
-    portfinder.basePort = this.serverOptions.port;
-    return new Promise((resolve, reject) => {
-      portfinder
-        .getPortPromise()
-        .then((port) => {
-          this.serverOptions.port = port;
-          resolve(port);
-        })
-        .catch(reject);
-    });
   }
   afterFileChange() {
     // 文件内容变化完毕之后的操作
@@ -85,14 +76,50 @@ export default class VMock {
   }
   getEnvType() {
     // 获取运行环境
-    const args = process.argv.slice(2);
-    console.log('环境参数', args);
-    this.env = args;
+    this.argvs = minimist(process.argv.slice(2));
+    console.log('环境参数', this.argvs);
+    this.getDefaultConfig();
+  }
+  getDefaultConfig() {
+    // 判断文件是否存在
+    const config = {
+      originFile: '',
+      replace: {},
+      mockConfig: {},
+    };
+    const filePath = path.resolve(process.cwd(), 'vbuilder.config.js');
+    if (fse.existsSync(filePath)) {
+      config.originFile = fse.readFileSync(filePath).toString();
+      // 解析 replace 对象
+      this.vbuilderConfig = config;
+    }
+    function getReplace() {
+      let file = config.originFile;
+      let idx = file.indexOf('replace:');
+      if (idx > -1) {
+        file = file.slice(idx + 1);
+        idx = file.indexOf('{');
+        const stack = [];
+        const fileStack = [];
+        if (idx > -1) {
+          stack.push('{');
+          fileStack.push('{');
+          file = file.slice(idx + 1);
+          while (stack.length > 0) {
+            if (file.indexOf('{') > -1 || file.indexOf('}') > -1) {
+              if (file.indexOf('{') > -1) {
+                // 存入 stack
+                idx = file.indexOf('{');
+              } else {
+                // 取出 stack
+              }
+            } else {
+              break;
+            }
+          }
+        }
+      }
+      return;
+    }
   }
 }
-
-// let vmock = new VMock({
-//     userFolder: process.cwd()
-// })
-
-// vmock.server()

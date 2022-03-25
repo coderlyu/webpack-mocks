@@ -104,7 +104,6 @@ export default class FileSystem extends FileWatch implements Path {
 
     // 注册路由的监听事件
     this.route.on('route-ready', this.routeReady);
-    // this.route.on('')
   }
   fileChange(filename: string): void {
     const filePath = this.resolve(mockConfig.mockDirName + path.sep + filename);
