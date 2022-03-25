@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+        let origin = `{
+            replace: {
+        $$_THOR_HOST_$$: {
+          // 'dev-daily': '//h5.dev.weidian.com:7001',
+          'dev-daily': '//thor.daily.weidian.com',
+          'dev-pre': '//thor.pre.weidian.com',
+          'dev-prod': '//thor.weidian.com',
+  
+          // 发布相关
+          'build-daily': '//thor.daily.weidian.com',
+          'build-pre': '//thor.pre.weidian.com',
+          'build-prod': '//thor.weidian.com'
+        },
+        $$_ENVIRONMENT_$$: {
+          'dev-daily': 1,
+          'dev-pre': 2,
+          'dev-prod': 3,
+  
+          // 发布相关
+          'build-daily': 1,
+          'build-pre': 2,
+          'build-prod': 3
+        },
+        $$_SOCKETURL_$$: {
+          'dev-daily': 'wss://lava.daily.weidian.com',
+          'dev-pre': 'wss://lava.pre.weidian.com',
+          'dev-prod': 'wss://lava.weidian.com',
+  
+          // 发布相关
+          'build-daily': 'wss://lava.daily.weidian.com',
+          'build-pre': 'wss://lava.pre.weidian.com',
+          'build-prod': 'wss://lava.weidian.com'
+        }
+      }
+        }`
+      const config = {
+        originFile: origin,
+        replace: {},
+        mockConfig: {},
+      };
+      getParseFile('replace:');
+
+      // 解析
+      function getParseFile(target) {
+        let file = config.originFile;
+        let idx = file.indexOf(target);
+        if (idx > -1) {
+          file = file.slice(idx + target.length + 1);
+          idx = file.indexOf('{');
+          const stack = [];
+          const fileStack = [];
+          if (idx > -1) {
+            stack.push('{');
+            fileStack.push('{');
+            file = file.slice(idx + 1);
+            while (stack.length > 0) {
+              if (file.indexOf('{') > -1 || file.indexOf('}') > -1) {
+                if (file.indexOf('{') > -1 && file.indexOf('{') < file.indexOf('}')) {
+                  // 先匹配到的是 {
+                  // 存入 stack
+                  idx = file.indexOf('{');
+                  fileStack.push(file.slice(0, idx));
+                  file = file.slice(idx + 1);
+                  fileStack.push('{');
+                  stack.push('{');
+                } else if (file.indexOf('}') === -1) {
+                  // 未匹配到 } 直接 break
+                  break;
+                } else {
+                  // 此时匹配到的是 } 用 { 去抵消
+                  // 取出 stack
+                  let char = stack.pop();
+                  if (char !== '{') {
+                    // 无法匹配，此时说明解析错误，直接推出
+                    throw new Error('replace解析错误');
+                  } else {
+                    idx = file.indexOf('}');
+                    fileStack.push(file.slice(0, idx));
+                    file = file.slice(idx + 1);
+                    fileStack.push('}');
+                  }
+                }
+              } else {
+                break;
+              }
+            }
+            // 解析完成，尝试拼接
+            const finallyStr = fileStack.join('');
+            console.log('finallyJson', finallyStr);
+            try {
+              const finallyJson = new Function('return' + finallyStr)(); // 转换成 json
+
+              if (typeof finallyJson === 'object') {
+                const key = target.slice(0, target.length - 1);
+                config[key] = finallyJson;
+              }
+            } catch (error) {
+              throw new Error('循环解析文本出错');
+            }
+          }
+        }
+        return;
+      }
+
+      // 循环替换
+      function transform() {
+        const replace = config.replace;
+        Object.keys(replace).forEach((item) => {
+          const target = replace[item];
+          Object.keys(target).forEach((key) => {
+            const address = target[key]
+            // 替换原来的 监听端口号 为当前实际的端口号
+            if (typeof address === 'string') target[key] = address.replace(/:[0-9]*$/g, ':' + 'port');
+          });
+        });
+      }
+      transform()
+    </script>
+  </body>
+</html>

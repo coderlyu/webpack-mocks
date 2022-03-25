@@ -61,9 +61,11 @@ export default class VMock {
           Object.keys(target).forEach((key) => {
             const address = target[key] as string;
             // 替换原来的 监听端口号 为当前实际的端口号
-            target[key] = address.replace(/:[0-9]*$/g, ':' + port);
+            if (typeof address === 'string') target[key] = address.replace(/:[0-9]*$/g, ':' + port);
           });
         });
+        console.log('vbuilderConfig', this.vbuilderConfig);
+        //
         this.createServer();
       })
       .catch((error) => {
@@ -127,14 +129,14 @@ export default class VMock {
       // 解析 replace 对象
       getParseFile('replace:');
       // 解析 mockProxy 对象
-      getParseFile('mockConfig:');
+      // getParseFile('mockConfig:');
       this.vbuilderConfig = config;
     }
     function getParseFile(target: string) {
       let file = config.originFile;
       let idx = file.indexOf(target);
       if (idx > -1) {
-        file = file.slice(idx + 1);
+        file = file.slice(idx + target.length + 1);
         idx = file.indexOf('{');
         const stack = [];
         const fileStack = [];
@@ -144,7 +146,7 @@ export default class VMock {
           file = file.slice(idx + 1);
           while (stack.length > 0) {
             if (file.indexOf('{') > -1 || file.indexOf('}') > -1) {
-              if (file.indexOf('{') > file.indexOf('}')) {
+              if (file.indexOf('{') > -1 && file.indexOf('{') < file.indexOf('}')) {
                 // 先匹配到的是 {
                 // 存入 stack
                 idx = file.indexOf('{');
@@ -174,10 +176,10 @@ export default class VMock {
             }
           }
           // 解析完成，尝试拼接
-          fileStack.push('}');
           const finallyStr = fileStack.join('');
           try {
             const finallyJson = new Function('return' + finallyStr)(); // 转换成 json
+
             if (typeof finallyJson === 'object') {
               const key = target.slice(0, target.length - 1);
               config[key] = finallyJson;
