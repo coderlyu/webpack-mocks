@@ -20,24 +20,25 @@ export default class VMock {
   ready = false;
   modules: Module;
   argvs = {};
-  vbuilderConfig = {
-    originFile: '',
-    replace: {
-      $$_THOR_HOST_$$: {
-        'dev-daily': '//h5.dev.weidian.com:7001',
-        'dev-pre': '//thor.pre.weidian.com',
-        'dev-prod': '//thor.weidian.com',
-      },
-    },
-    mockConfig: {
-      proxy: {
-        source: '',
-        target: '',
-      },
-    },
-  };
+  vbuilderConfig: any;
   constructor(options: Options, serverOptions?: ServerOptions) {
     // super();
+    this.vbuilderConfig = {
+      originFile: '',
+      replace: {
+        $$_THOR_HOST_$$: {
+          'dev-daily': '//h5.dev.weidian.com:7001',
+          'dev-pre': '//thor.pre.weidian.com',
+          'dev-prod': '//thor.weidian.com',
+        },
+      },
+      mockConfig: {
+        proxy: {
+          source: '',
+          target: '',
+        },
+      },
+    };
     this.getEnvType();
     this.modules = new Module(); // 文件模块，route 和 fileSystem 共用的数据
     this.route = new Route(this.modules); // 生成路由
@@ -49,22 +50,25 @@ export default class VMock {
   server() {
     this.fileSystem.generateRoutes(); // 初始化路由
     // 中
-    getFreePort(this.serverOptions.port).then((port: number) => {
-      this.serverOptions.port = port;
+    getFreePort(this.serverOptions.port)
+      .then((port: number) => {
+        this.serverOptions.port = port;
 
-      // 替换 vbuilderConfig.replace 里面的端口号
-      const replace = this.vbuilderConfig.replace;
-      Object.keys(replace).forEach((item) => {
-        const target = replace[item];
-        Object.keys(target).forEach((key) => {
-          const address = target[key] as string;
-          // 替换原来的 监听端口号 为当前实际的端口号
-          target[key] = address.replace(/:[0-9]*$/g, ':' + port);
+        // 替换 vbuilderConfig.replace 里面的端口号
+        const replace = this.vbuilderConfig.replace;
+        Object.keys(replace).forEach((item) => {
+          const target = replace[item];
+          Object.keys(target).forEach((key) => {
+            const address = target[key] as string;
+            // 替换原来的 监听端口号 为当前实际的端口号
+            target[key] = address.replace(/:[0-9]*$/g, ':' + port);
+          });
         });
+        this.createServer();
+      })
+      .catch((error) => {
+        console.log(error);
       });
-
-      this.createServer();
-    });
   }
   beforeCreateServer() {
     // this.info(`beforeCreateServer`);
@@ -112,7 +116,7 @@ export default class VMock {
   }
   getDefaultConfig() {
     // 判断文件是否存在
-    const config = {
+    const config: any = {
       originFile: '',
       replace: {},
       mockConfig: {},
@@ -140,16 +144,29 @@ export default class VMock {
           file = file.slice(idx + 1);
           while (stack.length > 0) {
             if (file.indexOf('{') > -1 || file.indexOf('}') > -1) {
-              if (file.indexOf('{') > -1) {
+              if (file.indexOf('{') > file.indexOf('}')) {
+                // 先匹配到的是 {
                 // 存入 stack
                 idx = file.indexOf('{');
                 fileStack.push(file.slice(0, idx));
                 file = file.slice(idx + 1);
+                fileStack.push('{');
+                stack.push('{');
+              } else if (file.indexOf('}') === -1) {
+                // 未匹配到 } 直接 break
+                break;
               } else {
+                // 此时匹配到的是 } 用 { 去抵消
                 // 取出 stack
-                if (stack.pop() !== '}') {
+                let char = stack.pop();
+                if (char !== '{') {
                   // 无法匹配，此时说明解析错误，直接推出
                   throw new Error('replace解析错误');
+                } else {
+                  idx = file.indexOf('}');
+                  fileStack.push(file.slice(0, idx));
+                  file = file.slice(idx + 1);
+                  fileStack.push('}');
                 }
               }
             } else {
@@ -157,12 +174,16 @@ export default class VMock {
             }
           }
           // 解析完成，尝试拼接
-          const finallyStr = fileStack.join();
+          fileStack.push('}');
+          const finallyStr = fileStack.join('');
           try {
-            const finallyJson = JSON.parse(finallyStr);
-            if (typeof finallyJson === 'object') config[target.slice(target.length - 1)] = finallyJson;
+            const finallyJson = new Function('return' + finallyStr)(); // 转换成 json
+            if (typeof finallyJson === 'object') {
+              const key = target.slice(0, target.length - 1);
+              config[key] = finallyJson;
+            }
           } catch (error) {
-            throw new Error('JSON.parse 转换文件出错');
+            throw new Error('循环解析文本出错');
           }
         }
       }
@@ -171,12 +192,14 @@ export default class VMock {
   }
 }
 
-process.on('unhandledRejection', () => {
+process.on('unhandledRejection', (error) => {
   // 未处理 promise catch
+  console.log('unhandledRejection', error);
   process.exit(1);
 });
 
-process.on('uncaughtException', () => {
+process.on('uncaughtException', (error) => {
   // 未捕获的错误
+  console.log('uncaughtException', error);
   process.exit(1);
 });

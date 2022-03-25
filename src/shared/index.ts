@@ -48,7 +48,7 @@ export function getType(val: any): string {
  */
 export function getFreePort(port: number = 3000) {
   portfinder.basePort = port;
-  return new Promise((resolve, reject) => {
+  return new Promise<number>((resolve, reject) => {
     portfinder
       .getPortPromise()
       .then((port: number) => {
