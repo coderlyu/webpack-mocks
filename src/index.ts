@@ -20,7 +20,22 @@ export default class VMock {
   ready = false;
   modules: Module;
   argvs = {};
-  vbuilderConfig: Object | undefined;
+  vbuilderConfig = {
+    originFile: '',
+    replace: {
+      $$_THOR_HOST_$$: {
+        'dev-daily': '//h5.dev.weidian.com:7001',
+        'dev-pre': '//thor.pre.weidian.com',
+        'dev-prod': '//thor.weidian.com',
+      },
+    },
+    mockConfig: {
+      proxy: {
+        source: '',
+        target: '',
+      },
+    },
+  };
   constructor(options: Options, serverOptions?: ServerOptions) {
     // super();
     this.getEnvType();
@@ -34,7 +49,22 @@ export default class VMock {
   server() {
     this.fileSystem.generateRoutes(); // 初始化路由
     // 中
-    getFreePort(this.serverOptions.port).then(() => this.createServer());
+    getFreePort(this.serverOptions.port).then((port: number) => {
+      this.serverOptions.port = port;
+
+      // 替换 vbuilderConfig.replace 里面的端口号
+      const replace = this.vbuilderConfig.replace;
+      Object.keys(replace).forEach((item) => {
+        const target = replace[item];
+        Object.keys(target).forEach((key) => {
+          const address = target[key] as string;
+          // 替换原来的 监听端口号 为当前实际的端口号
+          target[key] = address.replace(/:[0-9]*$/g, ':' + port);
+        });
+      });
+
+      this.createServer();
+    });
   }
   beforeCreateServer() {
     // this.info(`beforeCreateServer`);
@@ -91,11 +121,14 @@ export default class VMock {
     if (fse.existsSync(filePath)) {
       config.originFile = fse.readFileSync(filePath).toString();
       // 解析 replace 对象
+      getParseFile('replace:');
+      // 解析 mockProxy 对象
+      getParseFile('mockConfig:');
       this.vbuilderConfig = config;
     }
-    function getReplace() {
+    function getParseFile(target: string) {
       let file = config.originFile;
-      let idx = file.indexOf('replace:');
+      let idx = file.indexOf(target);
       if (idx > -1) {
         file = file.slice(idx + 1);
         idx = file.indexOf('{');
@@ -110,12 +143,26 @@ export default class VMock {
               if (file.indexOf('{') > -1) {
                 // 存入 stack
                 idx = file.indexOf('{');
+                fileStack.push(file.slice(0, idx));
+                file = file.slice(idx + 1);
               } else {
                 // 取出 stack
+                if (stack.pop() !== '}') {
+                  // 无法匹配，此时说明解析错误，直接推出
+                  throw new Error('replace解析错误');
+                }
               }
             } else {
               break;
             }
+          }
+          // 解析完成，尝试拼接
+          const finallyStr = fileStack.join();
+          try {
+            const finallyJson = JSON.parse(finallyStr);
+            if (typeof finallyJson === 'object') config[target.slice(target.length - 1)] = finallyJson;
+          } catch (error) {
+            throw new Error('JSON.parse 转换文件出错');
           }
         }
       }
@@ -123,3 +170,13 @@ export default class VMock {
     }
   }
 }
+
+process.on('unhandledRejection', () => {
+  // 未处理 promise catch
+  process.exit(1);
+});
+
+process.on('uncaughtException', () => {
+  // 未捕获的错误
+  process.exit(1);
+});

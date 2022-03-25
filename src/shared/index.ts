@@ -51,7 +51,7 @@ export function getFreePort(port: number = 3000) {
   return new Promise((resolve, reject) => {
     portfinder
       .getPortPromise()
-      .then((port) => {
+      .then((port: number) => {
         resolve(port);
       })
       .catch(reject);
