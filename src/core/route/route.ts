@@ -11,6 +11,7 @@ export default class Route extends EventEmitter {
   ready: boolean; // 是否准备完毕
   compile: any;
   modules: Module;
+  app: Koa | undefined;
   constructor(modules: Module) {
     super();
     this.ready = false;
@@ -18,9 +19,10 @@ export default class Route extends EventEmitter {
     this.compile = new TsFileCompile();
     this.router = new KoaRouter(); // 初始化 router
   }
-  use(app: any) {
+  use(app: any, source?: string, isHttps?: false, domain?: string) {
     if (!this.ready) return;
-    this.router.use(Middleware(app));
+    this.app = app;
+    this.router.use(Middleware(app, source, isHttps, domain));
     app.use(this.router.routes()).use(this.router.allowedMethods());
   }
   generateRoutes() {
@@ -40,9 +42,9 @@ export default class Route extends EventEmitter {
     this.ready = true;
     this.emit('route-ready');
   }
-  reset(app: Koa) {
+  reset() {
     this.router = new KoaRouter();
-    this.router.use(Middleware(app));
+    this.app && this.router.use(Middleware(this.app));
   }
   routerPath(module: FileModule) {
     return '/' + module.relativePath;

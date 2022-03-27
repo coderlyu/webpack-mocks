@@ -6,7 +6,7 @@ import mockConfig from './config';
 import FileSystem from './core/file/file-system';
 import Route from './core/route/route';
 import Module from './core/file/file-module';
-import { getFreePort } from './shared/index';
+import { getFreePort, getJsonFromStr } from './shared/index';
 import minimist from 'minimist';
 import fse from 'fs-extra';
 import path from 'path';
@@ -34,7 +34,7 @@ export default class VMock {
       },
       mockConfig: {
         proxy: {
-          source: '',
+          source: 'daily',
           target: '',
         },
       },
@@ -108,7 +108,39 @@ export default class VMock {
   routerReady() {
     // 路由注册完毕，可以绑定到 app 上
     console.log('ready router');
-    this.route.use(this.app);
+    const proxy = this.vbuilderConfig.mockConfig.proxy;
+    const isHttps = proxy.target && proxy.target.startsWith('https://');
+    let source = '';
+    let domain = 'h5.dev.weidian.com';
+    if (proxy.source) {
+      const evns = ['daily', 'pre', 'prod'];
+      if (evns.includes(proxy.source)) {
+        const replace = this.vbuilderConfig.replace;
+        console.log('replace', Object.keys(replace));
+        loop1: for (let i = 0, key; i < Object.keys(replace).length; i++) {
+          key = Object.keys(replace)[i];
+          const target = replace[key];
+          console.log('target', target, Object.keys(replace));
+          for (let j = 0, key2; j < Object.keys(target).length; j++) {
+            key2 = Object.keys(target)[j];
+            const address = target[key2] as string;
+            // 只找第一个，暂时
+            if (typeof address === 'string' && key.includes(proxy.source)) {
+              source = address;
+              break loop1;
+            }
+          }
+        }
+      } else {
+        //
+        source = proxy.source;
+      }
+    }
+    if (isHttps) {
+      domain = proxy.target.slice('https://'.length);
+    }
+    console.log('domain', domain);
+    this.route.use(this.app, source, isHttps, domain);
   }
   getEnvType() {
     // 获取运行环境
@@ -127,69 +159,12 @@ export default class VMock {
     if (fse.existsSync(filePath)) {
       config.originFile = fse.readFileSync(filePath).toString();
       // 解析 replace 对象
-      getParseFile('replace:');
+      config.replace = getJsonFromStr(config.originFile, 'replace:');
       // 解析 mockProxy 对象
-      // getParseFile('mockConfig:');
-      this.vbuilderConfig = config;
-    }
-    function getParseFile(target: string) {
-      let file = config.originFile;
-      let idx = file.indexOf(target);
-      if (idx > -1) {
-        file = file.slice(idx + target.length + 1);
-        idx = file.indexOf('{');
-        const stack = [];
-        const fileStack = [];
-        if (idx > -1) {
-          stack.push('{');
-          fileStack.push('{');
-          file = file.slice(idx + 1);
-          while (stack.length > 0) {
-            if (file.indexOf('{') > -1 || file.indexOf('}') > -1) {
-              if (file.indexOf('{') > -1 && file.indexOf('{') < file.indexOf('}')) {
-                // 先匹配到的是 {
-                // 存入 stack
-                idx = file.indexOf('{');
-                fileStack.push(file.slice(0, idx));
-                file = file.slice(idx + 1);
-                fileStack.push('{');
-                stack.push('{');
-              } else if (file.indexOf('}') === -1) {
-                // 未匹配到 } 直接 break
-                break;
-              } else {
-                // 此时匹配到的是 } 用 { 去抵消
-                // 取出 stack
-                let char = stack.pop();
-                if (char !== '{') {
-                  // 无法匹配，此时说明解析错误，直接推出
-                  throw new Error('replace解析错误');
-                } else {
-                  idx = file.indexOf('}');
-                  fileStack.push(file.slice(0, idx));
-                  file = file.slice(idx + 1);
-                  fileStack.push('}');
-                }
-              }
-            } else {
-              break;
-            }
-          }
-          // 解析完成，尝试拼接
-          const finallyStr = fileStack.join('');
-          try {
-            const finallyJson = new Function('return' + finallyStr)(); // 转换成 json
-
-            if (typeof finallyJson === 'object') {
-              const key = target.slice(0, target.length - 1);
-              config[key] = finallyJson;
-            }
-          } catch (error) {
-            throw new Error('循环解析文本出错');
-          }
-        }
-      }
-      return;
+      config.mockConfig = getJsonFromStr(config.originFile, 'mockConfig:');
+      this.vbuilderConfig.originFile = config.originFile || this.vbuilderConfig.originFile;
+      this.vbuilderConfig.replace = config.replace || this.vbuilderConfig.replace;
+      this.vbuilderConfig.mockConfig = config.mockConfig || this.vbuilderConfig.mockConfig;
     }
   }
 }
