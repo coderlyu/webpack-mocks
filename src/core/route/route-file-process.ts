@@ -25,7 +25,7 @@ export default class RouteFileProcess {
   jsonProcess(ctx: Context, next: Next) {
     // json
     let data = JSON.stringify(this.module.file);
-    ctx.res.end(data, 'utf8');
+    ctx.body = data;
     next();
   }
   jsProcess(ctx: Context, next: Next) {

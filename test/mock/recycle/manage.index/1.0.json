@@ -1,0 +1,38 @@
+{
+  "status": {
+    "code": 0,
+    "message": "OK",
+    "description": ""
+  },
+  "result": {
+    "userInfo": {
+      "headImg": "",
+      "nickName": "",
+      "cash": 3455.32
+    },
+    "list": [
+      {
+        "desc": "5个商品出售中",
+        "title": "已发布的",
+        "type": 2,
+        "num": 2
+      },
+      {
+        "desc": "0个商品退款待处理",
+        "title": "已售出的",
+        "type": 3,
+        "num": 10
+      }
+    ]
+  },
+  "guideInfo": {
+    "moreUrl": "",
+    "list": [
+      {
+        "img": "",
+        "url": ""
+      }
+    ]
+  },
+  "marketUrl": ""
+}

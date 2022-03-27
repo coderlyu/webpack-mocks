@@ -1,0 +1,15 @@
+{
+  "status": {
+    "code": 0,
+    "message": "OK",
+    "description": ""
+  },
+  "result": {
+    "authInfo": { "authStatus": 3, "msg": ["证件不清晰"] },
+    "userId": "23455432",
+    "userName": "葫芦娃",
+    "certNo": "5432345654efgre",
+    "certType": "IC",
+    "telephone": "1866666666"
+  }
+}

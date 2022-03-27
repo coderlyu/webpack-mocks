@@ -1,0 +1,36 @@
+{
+  "status": {
+    "code": 0,
+    "message": "OK",
+    "description": ""
+  },
+  "result": {
+    "data": [
+      {
+        "name": "现货直拍原创15cm棉花娃娃马嘉",
+        "bizId": 21313,
+        "bizType": 2,
+        "image": "",
+        "subscribe": false,
+        "price": 1321
+      },
+      {
+        "name": "现货直拍原创15cm棉花娃娃马嘉",
+        "bizId": 21313,
+        "bizType": 2,
+        "image": "",
+        "subscribe": true,
+        "price": 1321
+      },
+      {
+        "name": "现货直拍原创15cm棉花娃娃马嘉",
+        "bizId": 21313,
+        "bizType": 2,
+        "image": "",
+        "subscribe": false,
+        "price": 1321
+      }
+    ],
+    "hasNext": true
+  }
+}

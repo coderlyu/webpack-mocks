@@ -1,0 +1,13 @@
+{
+  "status": {
+      "code": 0,
+      "message": "OK",
+      "description": ""
+  },
+  "result":{
+      "resellItemNum": 123,
+      "resellItemTotalPrice": 123123,
+      "pic": "https://si.geilicdn.com/img-0deb0000017d276723480a21146b-unadjust_135_135.png",
+      "hasRisk": true
+  }
+}

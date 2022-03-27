@@ -1,0 +1,67 @@
+{
+  "status": {
+    "code": 0,
+    "message": "OK",
+    "description": ""
+  },
+  "result": {
+    "data": [
+      {
+        "name": "现货直拍原创15cm棉花娃娃马嘉",
+        "size": "20cm",
+        "attribute": "属性",
+        "shopName": "爱吃西米露",
+        "type": "娃衣",
+        "bizId": 21313,
+        "bizType": 2,
+        "image": "",
+        "subscribe": true
+      },
+      {
+        "name": "xxxx",
+        "size": "20cm",
+        "attribute": "属性",
+        "shopName": "xxxx",
+        "type": "娃娃",
+        "bizId": 21313,
+        "bizType": 2,
+        "image": "",
+        "subscribe": false
+      },
+      {
+        "name": "xxxx",
+        "size": "20cm",
+        "attribute": "属性",
+        "shopName": "xxxx",
+        "type": "娃衣",
+        "bizId": 21313,
+        "bizType": 2,
+        "image": "",
+        "subscribe": false
+      },
+      {
+        "name": "xxxx",
+        "size": "20cm",
+        "attribute": "属性",
+        "shopName": "xxxx",
+        "type": "娃娃",
+        "bizId": 21313,
+        "bizType": 2,
+        "image": "",
+        "subscribe": false
+      },
+      {
+        "name": "xxxx",
+        "size": "20cm",
+        "attribute": "属性",
+        "shopName": "xxxx",
+        "type": "娃娃",
+        "bizId": 21313,
+        "bizType": 2,
+        "image": "",
+        "subscribe": true
+      }
+    ],
+    "hasNext": true
+  }
+}

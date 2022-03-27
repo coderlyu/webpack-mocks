@@ -21,6 +21,11 @@ export default function genMiddleWare(
   }
   return async function middleware(ctx: Context, next: Next) {
     try {
+      if (ctx.method && ctx.method.toLocaleUpperCase() === 'POST') {
+        ctx.set({
+          'Content-Type': 'application/json',
+        });
+      }
       await next();
       console.log('ctx', ctx);
     } catch (error) {}
