@@ -126,14 +126,10 @@ export default class FileSystem extends FileWatch implements Path {
     // const filePath = this.resolve(mockConfig.mockDirName + path.sep + filename);
     const { path: _filePath, module } = this.readFileByOrder(filename, true);
     this.modules.set(_filePath, module);
-    console.log('file change', filename);
-    this.emit('change-after', filename);
   }
   fileDelete(filename: string): void {
-    console.log('delete', filename);
     // this.modules.clear();
     // this.generateRoutes(); //! 暂时这么处理，后续完善路径对比
-    this.emit('delete-after', filename); // TODO: 后续完善路径对比
   }
   fileAdd(filename: string) {
     this.modules.clear();

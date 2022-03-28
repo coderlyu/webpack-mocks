@@ -79,10 +79,6 @@ export default class VMock {
     this.fileSystem.on('router-ready', () => {
       this.routerReady();
     });
-
-    // 文件变化
-    this.fileSystem.on('change-after', this.afterFileChange);
-    this.fileSystem.on('rename-after', this.afterFileRename);
   }
   createServer() {
     // this.info(`createServer`);
@@ -97,15 +93,6 @@ export default class VMock {
   }
   afterCreateServer() {
     // this.info(`afterCreateServer`);
-  }
-  afterFileChange() {
-    // 文件内容变化完毕之后的操作
-  }
-  afterFileRename() {
-    // 文件命名变化/删除/新增之后的操作
-    // 修改路由
-    // 删除路由
-    // 新增路由
   }
   routerReady() {
     // 路由注册完毕，可以绑定到 app 上
