@@ -27,7 +27,7 @@ export default function genMiddleWare(
         });
       }
       await next();
-      console.log('ctx', ctx);
+      // console.log('ctx', ctx);
     } catch (error) {
       console.log('未匹配到路由', ctx);
     }

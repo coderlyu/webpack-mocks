@@ -28,8 +28,30 @@ export default class RouteFileProcess {
     ctx.body = data;
     next();
   }
-  jsProcess(ctx: Context, next: Next) {
+  async jsProcess(ctx: Context, next: Next) {
     // 处理 js 文件
+    const fn = this.module.file;
+    console.log('ctx.query', ctx.query);
+    console.log('ctx.body', ctx.body);
+    let data = '';
+    const params = (ctx.body as object) || ctx.query || {};
+    switch (typeof fn) {
+      case 'object':
+        data = fn;
+        break;
+      case 'function':
+        try {
+          data = await fn({ ...params });
+        } catch (error) {
+          ctx.status = 400;
+          data = error as string;
+        }
+        break;
+      default:
+        break;
+    }
+    ctx.body = JSON.stringify(data);
+    next();
   }
   async tsProcess(ctx: Context, next: Next) {
     // ts

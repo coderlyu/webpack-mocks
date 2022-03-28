@@ -22,9 +22,6 @@ export default class FileSystem extends FileWatch implements Path {
     this.registerMonitor(); // 注册监听回掉事件
     this.watch(); // 监听文件
   }
-  getRunningConfig() {
-    // 获取配置文件
-  }
   generateRoutes(): void {
     if (this.options.userFolder && this.isDir(this.mockDir)) {
       if (!this.isExistsFile(this.mockDir)) return;
@@ -46,11 +43,17 @@ export default class FileSystem extends FileWatch implements Path {
   resolve(filePath: string, userFolder: string = this.options.userFolder): string {
     return path.resolve(userFolder, filePath);
   }
-  require(filePath: string, type: string): FileModule | undefined {
-    if (this.modules.has(filePath)) return this.modules.get(filePath);
+  require(filePath: string, type: string, refresh?: boolean): FileModule | undefined {
+    if (this.modules.has(filePath) && !refresh) return this.modules.get(filePath);
     // json, js, ts 文件
-    const file = require(filePath + '.' + type);
-    this.modules.add(filePath, file, this.relativePath(filePath), type);
+    try {
+      delete require.cache[filePath + '.' + type]; // 清除 require 缓存
+      const file = require(filePath + '.' + type);
+      if (refresh) this.modules.set(filePath, file);
+      else this.modules.add(filePath, file, this.relativePath(filePath), type);
+    } catch (error) {
+      return undefined;
+    }
     return this.modules.get(filePath);
   }
   isDir(filePath: string): boolean {
@@ -60,14 +63,24 @@ export default class FileSystem extends FileWatch implements Path {
   isExistsFile(filePath: string): boolean {
     return fs.existsSync(filePath);
   }
-  readFile(filePath: string, type: string): FileModule | undefined {
+  readFile(filePath: string, type: string, refresh?: boolean): FileModule | undefined {
     // 其他文件类型
-    if (this.modules.has(filePath)) return this.modules.get(filePath);
-    const file = fs.readFileSync(filePath + '.' + type).toString();
-    this.modules.add(filePath, file, this.relativePath(filePath), type);
+    if (this.modules.has(filePath) && !refresh) return this.modules.get(filePath);
+    try {
+      const file = fs.readFileSync(filePath + '.' + type).toString();
+      if (refresh) this.modules.set(filePath, file);
+      else this.modules.add(filePath, file, this.relativePath(filePath), type);
+    } catch (error) {
+      return undefined;
+    }
     return this.modules.get(filePath);
   }
-  readFileByOrder(filePath: string): { type: string; path: string; module: FileModule | undefined } {
+  /**
+   *
+   * @param filePath 绝对路径
+   * @returns
+   */
+  readFileByOrder(filePath: string, refresh = false): { type: string; path: string; module: FileModule | undefined } {
     const idx = filePath.lastIndexOf('.');
     let fileType = '';
     let isInResolveOrder = false;
@@ -87,9 +100,9 @@ export default class FileSystem extends FileWatch implements Path {
     let module: FileModule | undefined;
     if (isInResolveOrder && fileType !== 'ts') {
       // ts, js, json
-      module = this.require(filePath, fileType);
+      module = this.require(filePath, fileType, refresh);
     } else {
-      module = this.readFile(filePath, fileType);
+      module = this.readFile(filePath, fileType, refresh);
     }
     return {
       type: fileType,
@@ -100,22 +113,32 @@ export default class FileSystem extends FileWatch implements Path {
   registerMonitor(): void {
     // 注册监听文件变化的回掉事件
     this.on('change', this.fileChange);
-    this.on('rename', this.fileRename);
+    // rename 分两步
+    // 1. delete 原有文件
+    // 2. add 改名后的文件
+    this.on('add', this.fileAdd);
+    this.on('delete', this.fileDelete);
 
     // 注册路由的监听事件
     this.route.on('route-ready', this.routeReady);
   }
   fileChange(filename: string): void {
-    const filePath = this.resolve(mockConfig.mockDirName + path.sep + filename);
-    const { path: _filePath, module } = this.readFileByOrder(filePath);
+    // const filePath = this.resolve(mockConfig.mockDirName + path.sep + filename);
+    const { path: _filePath, module } = this.readFileByOrder(filename, true);
     this.modules.set(_filePath, module);
-    console.log('file change');
+    console.log('file change', filename);
     this.emit('change-after', filename);
   }
-  fileRename(filename: string): void {
+  fileDelete(filename: string): void {
+    console.log('delete', filename);
+    // this.modules.clear();
+    // this.generateRoutes(); //! 暂时这么处理，后续完善路径对比
+    this.emit('delete-after', filename); // TODO: 后续完善路径对比
+  }
+  fileAdd(filename: string) {
     this.modules.clear();
-    this.generateRoutes(); //! 暂时这么处理，后续完善路径对比
-    this.emit('rename-after', filename); // TODO: 后续完善路径对比
+    this.generateRoutes();
+    this.emit('add-after', filename);
   }
   routeReady() {
     console.log('system router');

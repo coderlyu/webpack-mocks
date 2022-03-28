@@ -1,5 +1,6 @@
 import { Options, ServerOptions } from './index.d';
 import Koa from 'koa';
+import bodyParser from 'koa-bodyparser';
 import KoaCros from 'koa2-cors';
 import mockConfig from './config';
 // import Log from './shared/log';
@@ -64,7 +65,7 @@ export default class VMock {
             if (typeof address === 'string') target[key] = address.replace(/:[0-9]*$/g, ':' + port);
           });
         });
-        console.log('vbuilderConfig', this.vbuilderConfig);
+        // console.log('vbuilderConfig', this.vbuilderConfig);
         //
         this.createServer();
       })
@@ -86,7 +87,8 @@ export default class VMock {
   createServer() {
     // this.info(`createServer`);
     this.app = new Koa();
-    this.app.use(KoaCros(mockConfig.corsHandler));
+    this.app.use(KoaCros(mockConfig.corsHandler)).use(bodyParser());
+
     this.app.listen(this.serverOptions.port);
     this.routerReady();
     console.log(`The server is running at http://localhost:${this.serverOptions.port}`);

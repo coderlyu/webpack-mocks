@@ -2,7 +2,7 @@
   "status": {
     "code": 0,
     "message": "OK",
-    "description": ""
+    "description": "ff"
   },
   "result": {
     "subscribeNodes": [
@@ -20,7 +20,7 @@
         "bizType": 1,
         "count": 123,
         "image": "",
-        "subscribe": false
+        "subscribe": true
       },
       {
         "name": "现货直拍原创15cm棉花娃娃马嘉",
