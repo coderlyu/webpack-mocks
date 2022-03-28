@@ -1,5 +1,5 @@
 import { Options, ServerOptions } from './index.d';
-import koa from 'koa';
+import Koa from 'koa';
 import KoaCros from 'koa2-cors';
 import mockConfig from './config';
 // import Log from './shared/log';
@@ -13,7 +13,7 @@ import path from 'path';
 // extends Log
 export default class VMock {
   options: Options;
-  app: koa | undefined;
+  app: Koa | undefined;
   fileSystem: any;
   route: any;
   serverOptions: ServerOptions;
@@ -85,7 +85,7 @@ export default class VMock {
   }
   createServer() {
     // this.info(`createServer`);
-    this.app = new koa();
+    this.app = new Koa();
     this.app.use(KoaCros(mockConfig.corsHandler));
     this.app.listen(this.serverOptions.port);
     this.routerReady();
@@ -116,11 +116,9 @@ export default class VMock {
       const evns = ['daily', 'pre', 'prod'];
       if (evns.includes(proxy.source)) {
         const replace = this.vbuilderConfig.replace;
-        // console.log('replace', Object.keys(replace));
         loop1: for (let i = 0, key; i < Object.keys(replace).length; i++) {
           key = Object.keys(replace)[i];
           const target = replace[key];
-          // console.log('target', target, Object.keys(replace));
           for (let j = 0, key2; j < Object.keys(target).length; j++) {
             key2 = Object.keys(target)[j];
             const address = target[key2] as string;

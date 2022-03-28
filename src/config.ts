@@ -2,7 +2,6 @@ export default {
   mockDirName: 'mock', // mock 文件夹
   corsHandler: {
     origin: function (ctx: any) {
-      console.log('ctx.request', ctx.request.header.origin);
       if (ctx.request.header && ctx.request.header.origin) return ctx.request.header.origin;
       return '*';
     },

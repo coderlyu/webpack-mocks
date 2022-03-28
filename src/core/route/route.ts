@@ -39,6 +39,11 @@ export default class Route extends EventEmitter {
         });
       }
     });
+    // this.methods.forEach((method) => {
+    //     this.router[method]('/*', (ctx: Context, next: Next) => {
+    //         console.log('未匹配到', ctx)
+    //     })
+    // })
     this.ready = true;
     this.emit('route-ready');
   }

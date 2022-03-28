@@ -9,16 +9,16 @@ export default function genMiddleWare(
   isHttps: boolean = false,
   domain: string = 'h5.dev.weidian.com',
 ) {
-  if (isHttps) {
-    require('devcert')
-      .certificateFor(domain, { getCaPath: true })
-      .then((ssl: any) => {
-        const { key, cert } = ssl;
-        https.createServer({ key, cert }, app.callback()).listen(443);
-      });
-  } else {
-    getFreePort().then((port) => http.createServer(app.callback()).listen(port));
-  }
+  //   if (isHttps) {
+  //     require('devcert')
+  //       .certificateFor(domain, { getCaPath: true })
+  //       .then((ssl: any) => {
+  //         const { key, cert } = ssl;
+  //         https.createServer({ key, cert }, app.callback()).listen(443);
+  //       });
+  //   } else {
+  //     getFreePort().then((port) => http.createServer(app.callback()).listen(port));
+  //   }
   return async function middleware(ctx: Context, next: Next) {
     try {
       if (ctx.method && ctx.method.toLocaleUpperCase() === 'POST') {
@@ -28,6 +28,8 @@ export default function genMiddleWare(
       }
       await next();
       console.log('ctx', ctx);
-    } catch (error) {}
+    } catch (error) {
+      console.log('未匹配到路由', ctx);
+    }
   };
 }

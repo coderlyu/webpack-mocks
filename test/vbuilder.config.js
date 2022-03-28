@@ -120,7 +120,7 @@ module.exports = ({
       // 接口请求失败时，将会代理到真实接口
       proxy: {
         source: 'daily',
-        target: '' // https://thor.daily.weidian.com
+        target: 'thor.pre.weidian.com' // https://thor.daily.weidian.com
       }
     }
     // 启用 rpx 单位的适配方案
