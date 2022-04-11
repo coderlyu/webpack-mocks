@@ -13,16 +13,7 @@ export default {
   input: `src/${libraryName}.ts`,
   output: [
     { file: pkg.main, name: camelCase(libraryName), format: 'umd', sourcemap: true },
-    { file: pkg.module, format: 'es', sourcemap: true },
-    // {
-    //   global: {
-    //     'koa': 'koa',
-    //     'KoaCros': 'KoaCros',
-    //     'portfinder': 'portfinder',
-    //     'log4js': 'log4js',
-    //     'KoaRouter': 'KoaRouter'
-    //   }
-    // }
+    { file: pkg.module, format: 'es', sourcemap: true }
   ],
   // Indicate here external modules you don't wanna include in your bundle (i.e.: 'lodash')
   external: [

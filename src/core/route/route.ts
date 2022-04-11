@@ -5,13 +5,12 @@ import { EventEmitter } from 'events';
 import TsFileCompile from '../compile/ts-file-compile';
 import Module, { FileModule } from '../file/file-module';
 import Koa, { Context, Next } from 'koa';
-export default class Route extends EventEmitter {
+export default class Router extends EventEmitter {
   router: any;
   methods = ['post', 'get', 'delete'];
   ready: boolean; // 是否准备完毕
   compile: any;
   modules: Module;
-  app: Koa | undefined;
   constructor(modules: Module) {
     super();
     this.ready = false;
@@ -19,10 +18,9 @@ export default class Route extends EventEmitter {
     this.compile = new TsFileCompile();
     this.router = new KoaRouter(); // 初始化 router
   }
-  use(app: any, source?: string, isHttps?: false, domain?: string) {
+  use(app: Koa) {
     if (!this.ready) return;
-    this.app = app;
-    this.router.use(Middleware(app, source, isHttps, domain));
+    this.router.use(Middleware);
     app.use(this.router.routes()).use(this.router.allowedMethods());
   }
   generateRoutes() {
@@ -44,7 +42,7 @@ export default class Route extends EventEmitter {
   }
   reset() {
     this.router = new KoaRouter();
-    this.app && this.router.use(Middleware(this.app));
+    this.router.use(Middleware);
   }
   routerPath(module: FileModule) {
     return '/' + module.relativePath;

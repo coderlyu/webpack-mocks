@@ -4,9 +4,9 @@ import path from 'path';
 import fs from 'fs';
 import mockConfig from '../../config';
 import Module, { FileModule } from './file-module';
-import Path from './path';
+import { relativePathFix } from '../../shared/index';
 
-export default class FileSystem extends FileWatch implements Path {
+export default class FileSystem extends FileWatch {
   options: Options;
   resolveOrder = ['json', 'js', 'ts'];
   mockDir: string;
@@ -141,33 +141,7 @@ export default class FileSystem extends FileWatch implements Path {
     // route 路由准备完毕
     this.emit('router-ready');
   }
-  /**
-   * 判断是否是相对路径
-   * @param path
-   * @returns
-   */
-  isRelativePath(path: string) {
-    return path.startsWith('.') || !path.startsWith('/');
-  }
-  /**
-   * 修复相对路径
-   * @param path
-   * @returns
-   */
-  relativePathFix(path: string) {
-    return path.replace(/^(\.+\/)+/g, '');
-  }
-  /**
-   * 获取绝对路径
-   * @param _path
-   * @param prefix 前缀
-   * @returns
-   */
-  absolutePath(_path: string, prefix: string = this.mockDir) {
-    if (!this.isRelativePath(_path)) return _path;
-    return path.resolve(prefix, _path);
-  }
   relativePath(_path: string) {
-    return this.relativePathFix(path.relative(this.mockDir, _path));
+    return relativePathFix(path.relative(this.mockDir, _path));
   }
 }

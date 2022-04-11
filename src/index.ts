@@ -3,27 +3,26 @@ import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import KoaCros from 'koa2-cors';
 import mockConfig from './config';
-// import Log from './shared/log';
 import FileSystem from './core/file/file-system';
-import Route from './core/route/route';
+import Router from './core/route/route';
 import Module from './core/file/file-module';
 import { getFreePort, getJsonFromStr } from './shared/index';
 import minimist from 'minimist';
 import fse from 'fs-extra';
 import path from 'path';
-// extends Log
-export default class VMock {
+import Log from './shared/log';
+export default class VMock extends Log {
   options: Options;
   app: Koa | undefined;
   fileSystem: any;
-  route: any;
+  route: Router;
   serverOptions: ServerOptions;
   ready = false;
   modules: Module;
   argvs = {};
   vbuilderConfig: any;
   constructor(options: Options, serverOptions?: ServerOptions) {
-    // super();
+    super();
     this.vbuilderConfig = {
       originFile: '',
       replace: {
@@ -42,7 +41,7 @@ export default class VMock {
     };
     this.getEnvType();
     this.modules = new Module(); // 文件模块，route 和 fileSystem 共用的数据
-    this.route = new Route(this.modules); // 生成路由
+    this.route = new Router(this.modules); // 生成路由
     this.fileSystem = new FileSystem(options, this.route, this.modules); // 操作 mock 文件
     this.options = Object.assign({}, mockConfig.defaultServerConfig, options);
     this.serverOptions = Object.assign({}, serverOptions, mockConfig.defaultServerConfig);
@@ -65,74 +64,35 @@ export default class VMock {
             if (typeof address === 'string') target[key] = address.replace(/:[0-9]*$/g, ':' + port);
           });
         });
-        // console.log('vbuilderConfig', this.vbuilderConfig);
-        //
         this.createServer();
       })
       .catch((error) => {
-        console.log(error);
+        this.error(error);
       });
   }
   beforeCreateServer() {
-    // this.info(`beforeCreateServer`);
     // 路由注册完毕，可以绑定到 app 上
     this.fileSystem.on('router-ready', () => {
       this.routerReady();
     });
   }
   createServer() {
-    // this.info(`createServer`);
     this.app = new Koa();
     this.app.use(KoaCros(mockConfig.corsHandler)).use(bodyParser());
 
     this.app.listen(this.serverOptions.port);
     this.routerReady();
-    console.log(`The server is running at http://localhost:${this.serverOptions.port}`);
-    // this.info(`The server is running at http://localhost:${this.serverOptions.port}`);
-    this.afterCreateServer();
-  }
-  afterCreateServer() {
-    // this.info(`afterCreateServer`);
+    this.info(`The server is running at http://localhost:${this.serverOptions.port}`);
   }
   routerReady() {
     // 路由注册完毕，可以绑定到 app 上
-    console.log('ready router');
-    const proxy = this.vbuilderConfig.mockConfig.proxy;
-    const isHttps = proxy.target && proxy.target.startsWith('https://');
-    let source = '';
-    let domain = 'h5.dev.weidian.com';
-    if (proxy.source) {
-      const evns = ['daily', 'pre', 'prod'];
-      if (evns.includes(proxy.source)) {
-        const replace = this.vbuilderConfig.replace;
-        loop1: for (let i = 0, key; i < Object.keys(replace).length; i++) {
-          key = Object.keys(replace)[i];
-          const target = replace[key];
-          for (let j = 0, key2; j < Object.keys(target).length; j++) {
-            key2 = Object.keys(target)[j];
-            const address = target[key2] as string;
-            // 只找第一个，暂时
-            if (typeof address === 'string' && key.includes(proxy.source)) {
-              source = address;
-              break loop1;
-            }
-          }
-        }
-      } else {
-        //
-        source = proxy.source;
-      }
-    }
-    if (isHttps) {
-      domain = proxy.target.slice('https://'.length);
-    }
-    console.log('domain', domain);
-    this.route.use(this.app, source, isHttps, domain);
+    this.info('router ready');
+    this.app && this.route.use(this.app);
   }
   getEnvType() {
     // 获取运行环境
     this.argvs = minimist(process.argv.slice(2));
-    console.log('环境参数', this.argvs);
+    this.info(`环境参数, ${this.argvs}`);
     this.getDefaultConfig();
   }
   getDefaultConfig() {

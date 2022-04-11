@@ -1,7 +1,6 @@
 import jsf from 'json-schema-faker';
 import { Schema } from 'json-schema-faker';
 import * as ts from 'typescript';
-import fs from 'fs';
 import typescriptJsonSchema from 'typescript-json-schema';
 export default class TsFileCompile {
   jsonSchema = typescriptJsonSchema;

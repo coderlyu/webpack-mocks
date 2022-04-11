@@ -1,4 +1,6 @@
 import portfinder from 'portfinder';
+export * from './file';
+export * from './path';
 /**
  * 判断是否是 Object 类型
  * @param val 需要获取类型的值

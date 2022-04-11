@@ -24,57 +24,81 @@ export default class RouteFileProcess {
   }
   jsonProcess(ctx: Context, next: Next) {
     // json
-    let data = JSON.stringify(this.module.file);
-    ctx.body = data;
+    try {
+      let data = JSON.stringify(this.module.file);
+      ctx.body = data;
+    } catch (error) {
+      ctx.status = 400;
+      ctx.body = JSON.stringify(error);
+    }
     next();
   }
   async jsProcess(ctx: Context, next: Next) {
     // 处理 js 文件
-    const fn = this.module.file;
-    console.log('ctx.query', ctx.query);
-    console.log('ctx.body', ctx.body);
-    let data = '';
-    const params = (ctx.body as object) || ctx.query || {};
-    switch (typeof fn) {
-      case 'object':
-        data = fn;
-        break;
-      case 'function':
-        try {
-          data = await fn({ ...params });
-        } catch (error) {
+    try {
+      const fn = this.module.file;
+      let data = '';
+      const params = (ctx.body as object) || ctx.query || {};
+      switch (typeof fn) {
+        case 'object':
+          data = fn;
+          break;
+        case 'function':
+          try {
+            data = await fn({ ...params });
+          } catch (error) {
+            ctx.status = 400;
+            data = error as string;
+          }
+          break;
+        default:
           ctx.status = 400;
-          data = error as string;
-        }
-        break;
-      default:
-        break;
+          data = 'error';
+          break;
+      }
+      ctx.body = JSON.stringify(data);
+    } catch (error) {
+      ctx.status = 400;
+      ctx.body = JSON.stringify(error);
     }
-    ctx.body = JSON.stringify(data);
     next();
   }
   async tsProcess(ctx: Context, next: Next) {
     // ts
-    const reg = /export(\s)+default(\s)+(.+)(\s)*(\n)?/g;
-    let type = '';
-    this.module.file.replace(reg, (...args: Array<string>) => {
-      type = args[3];
-    });
+    try {
+      const reg = /export(\s)+default(\s)+(.+)(\s)*(\n)?/g;
+      let type = '';
+      this.module.file.replace(reg, (...args: Array<string>) => {
+        type = args[3];
+      });
 
-    // 别的处理
-    const faceReg = /\s?interface\s?/g;
-    if (faceReg.test(type)) type = type.replace(faceReg, '');
-    if (/\{/g.test(type)) type = type.replace(/\{/g, '');
-    type = type.trim();
-    if (type.endsWith(';')) type = type.replace(';', '');
-    if (!type) {
-      ctx.res.end('出错了哦');
+      // 别的处理
+      const faceReg = /\s?interface\s?/g;
+      if (faceReg.test(type)) type = type.replace(faceReg, '');
+      if (/\{/g.test(type)) type = type.replace(/\{/g, '');
+      type = type.trim();
+      if (type.endsWith(';')) type = type.replace(';', '');
+      if (!type) {
+        ctx.res.end('出错了哦');
+      }
+      console.log('类型', type);
+      const _result = await this.compile.compiler(this.module.path, type);
+      ctx.res.end(_result.data);
+    } catch (error) {
+      ctx.status = 400;
+      ctx.body = JSON.stringify(error);
     }
-    console.log('类型', type);
-    const _result = await this.compile.compiler(this.module.path, type);
-    ctx.res.end(_result.data);
+    next();
   }
   htmlProcess(ctx: Context, next: Next) {
     // TODO: html 暂不做
+    try {
+      let data = JSON.stringify(this.module.file);
+      ctx.body = data;
+    } catch (error) {
+      ctx.status = 400;
+      ctx.body = JSON.stringify(error);
+    }
+    next();
   }
 }
