@@ -1,20 +1,18 @@
 import { configure, getLogger, Logger } from 'log4js';
-import { Options } from '../index.d';
 configure({
   appenders: {
     vMock: {
       type: 'console',
       layout: {
         type: 'pattern',
-        pattern: '[%[%p%]]-%d{yyyy/MM/dd-hh:mm:ss}： %m%n',
+        pattern: '[%[%p%]]-%d{yyyy/MM/dd-hh:mm:ss}： %m',
       },
     },
   },
   categories: { default: { appenders: ['vMock'], level: 'info' } },
 });
-export default abstract class Log {
+class Log {
   logger: Logger;
-  abstract options: Options;
   constructor() {
     this.logger = getLogger(); // 获取实例
   }
@@ -32,3 +30,7 @@ export default abstract class Log {
     this.logger.error(message);
   }
 }
+
+const logger = new Log();
+
+export default logger;

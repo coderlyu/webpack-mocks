@@ -1,5 +1,6 @@
 import { Context, Next } from 'koa';
 import { FileModule } from '../file/file-module';
+import logger from '../../shared/log';
 export default class RouteFileProcess {
   module: FileModule;
   compile: any;
@@ -28,6 +29,7 @@ export default class RouteFileProcess {
       let data = JSON.stringify(this.module.file);
       ctx.body = data;
     } catch (error) {
+      logger.error(JSON.stringify(error));
       ctx.status = 400;
       ctx.body = JSON.stringify(error);
     }
@@ -47,6 +49,7 @@ export default class RouteFileProcess {
           try {
             data = await fn({ ...params });
           } catch (error) {
+            logger.error(JSON.stringify(error));
             ctx.status = 400;
             data = error as string;
           }
@@ -58,6 +61,7 @@ export default class RouteFileProcess {
       }
       ctx.body = JSON.stringify(data);
     } catch (error) {
+      logger.error(JSON.stringify(error));
       ctx.status = 400;
       ctx.body = JSON.stringify(error);
     }
@@ -81,10 +85,18 @@ export default class RouteFileProcess {
       if (!type) {
         ctx.res.end('出错了哦');
       }
-      console.log('类型', type);
+      logger.info(`type: ${type}`);
       const _result = await this.compile.compiler(this.module.path, type);
-      ctx.res.end(_result.data);
+      const result = {
+        message: '请求成功',
+        result: {
+          code: 200,
+          data: _result.data,
+        },
+      };
+      ctx.body = JSON.stringify(result);
     } catch (error) {
+      logger.error(JSON.stringify(error));
       ctx.status = 400;
       ctx.body = JSON.stringify(error);
     }
@@ -96,6 +108,7 @@ export default class RouteFileProcess {
       let data = JSON.stringify(this.module.file);
       ctx.body = data;
     } catch (error) {
+      logger.error(JSON.stringify(error));
       ctx.status = 400;
       ctx.body = JSON.stringify(error);
     }

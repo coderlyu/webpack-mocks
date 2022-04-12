@@ -1,25 +1,23 @@
 import { Options } from '../../index.d';
-import FileWatch from './file-watch';
 import path from 'path';
 import fs from 'fs';
 import mockConfig from '../../config';
-import Module, { FileModule } from './file-module';
+import Module, { FileModuleName } from './file-module';
 import { relativePathFix } from '../../shared/index';
+import bus from '../../shared/bus';
+import logger from '../../shared/log';
+const chokidar = require('chokidar');
 
-export default class FileSystem extends FileWatch {
+export default class FileSystem {
   options: Options;
   resolveOrder = ['json', 'js', 'ts'];
   mockDir: string;
-  route: any;
   modules: Module;
   vbuildConfig: any;
-  constructor(options: Options, route: any, modules: Module) {
-    super();
+  constructor(options: Options, modules: Module) {
     this.options = options;
-    this.route = route;
     this.modules = modules; // 缓存的模块
     this.mockDir = this.resolve(mockConfig.mockDirName); // mock 目录
-    this.registerMonitor(); // 注册监听回掉事件
     this.watch(); // 监听文件
   }
   generateRoutes(): void {
@@ -37,13 +35,13 @@ export default class FileSystem extends FileWatch {
           this.readFileByOrder(_path); // 读取文件并缓存
         }
       }
-      this.route.generateRoutes(); // 生成路由
+      bus.emit('generateRoutes'); // 生成路由
     }
   }
   resolve(filePath: string, userFolder: string = this.options.userFolder): string {
     return path.resolve(userFolder, filePath);
   }
-  require(filePath: string, type: string, refresh?: boolean): FileModule | undefined {
+  require(filePath: string, type: string, refresh?: boolean): FileModuleName {
     if (this.modules.has(filePath) && !refresh) return this.modules.get(filePath);
     // json, js, ts 文件
     try {
@@ -52,6 +50,8 @@ export default class FileSystem extends FileWatch {
       if (refresh) this.modules.set(filePath, file);
       else this.modules.add(filePath, file, this.relativePath(filePath), type);
     } catch (error) {
+      logger.warn(`${filePath} is not a valid file`);
+      logger.error(JSON.stringify(error));
       return undefined;
     }
     return this.modules.get(filePath);
@@ -63,7 +63,7 @@ export default class FileSystem extends FileWatch {
   isExistsFile(filePath: string): boolean {
     return fs.existsSync(filePath);
   }
-  readFile(filePath: string, type: string, refresh?: boolean): FileModule | undefined {
+  readFile(filePath: string, type: string, refresh?: boolean): FileModuleName {
     // 其他文件类型
     if (this.modules.has(filePath) && !refresh) return this.modules.get(filePath);
     try {
@@ -71,6 +71,8 @@ export default class FileSystem extends FileWatch {
       if (refresh) this.modules.set(filePath, file);
       else this.modules.add(filePath, file, this.relativePath(filePath), type);
     } catch (error) {
+      logger.warn(`${filePath} is not a valid file`);
+      logger.error(JSON.stringify(error));
       return undefined;
     }
     return this.modules.get(filePath);
@@ -80,7 +82,7 @@ export default class FileSystem extends FileWatch {
    * @param filePath 绝对路径
    * @returns
    */
-  readFileByOrder(filePath: string, refresh = false): { type: string; path: string; module: FileModule | undefined } {
+  readFileByOrder(filePath: string, refresh = false): { type: string; path: string; module: FileModuleName } {
     const idx = filePath.lastIndexOf('.');
     let fileType = '';
     let isInResolveOrder = false;
@@ -91,13 +93,12 @@ export default class FileSystem extends FileWatch {
     for (let i = 0; i < this.resolveOrder.length; i++) {
       let _filePath = `${filePath}.${this.resolveOrder[i]}`;
       if (this.isExistsFile(_filePath)) {
-        // filePath = _filePath
         fileType = this.resolveOrder[i];
         isInResolveOrder = true;
         break;
       }
     }
-    let module: FileModule | undefined;
+    let module: FileModuleName;
     if (isInResolveOrder && fileType !== 'ts') {
       // ts, js, json
       module = this.require(filePath, fileType, refresh);
@@ -110,38 +111,37 @@ export default class FileSystem extends FileWatch {
       module,
     };
   }
-  registerMonitor(): void {
-    // 注册监听文件变化的回掉事件
-    this.on('change', this.fileChange);
-    // rename 分两步
-    // 1. delete 原有文件
-    // 2. add 改名后的文件
-    this.on('add', this.fileAdd);
-    this.on('delete', this.fileDelete);
-
-    // 注册路由的监听事件
-    this.route.on('route-ready', this.routeReady);
-  }
   fileChange(filename: string): void {
-    // const filePath = this.resolve(mockConfig.mockDirName + path.sep + filename);
+    // 注册监听文件变化的回掉事件
     const { path: _filePath, module } = this.readFileByOrder(filename, true);
     this.modules.set(_filePath, module);
   }
-  fileDelete(filename: string): void {
-    // this.modules.clear();
-    // this.generateRoutes(); //! 暂时这么处理，后续完善路径对比
-  }
   fileAdd(filename: string) {
+    // rename 分两步
+    // 1. delete 原有文件
+    // 2. add 改名后的文件
     this.modules.clear();
     this.generateRoutes();
-    this.emit('add-after', filename);
-  }
-  routeReady() {
-    console.log('system router');
-    // route 路由准备完毕
-    this.emit('router-ready');
   }
   relativePath(_path: string) {
     return relativePathFix(path.relative(this.mockDir, _path));
+  }
+  watch() {
+    chokidar.watch(this.mockDir, { ignoreInitial: true }).on('all', (event: any, path: any) => {
+      logger.info(`watch, ${event}, ${path}`);
+      switch (event) {
+        case 'change':
+          this.fileChange(path);
+          break;
+        case 'add':
+          this.fileAdd(path);
+          break;
+        case 'unlink':
+          // not support
+          break;
+        default:
+          break;
+      }
+    });
   }
 }

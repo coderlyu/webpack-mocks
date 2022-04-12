@@ -119,3 +119,5 @@ export default class Module {
     return Object.keys(this.relativeMap).filter((_) => !_arr.includes(_));
   }
 }
+
+export type FileModuleName = FileModule | undefined;

@@ -3,31 +3,28 @@ import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import KoaCros from 'koa2-cors';
 import mockConfig from './config';
-import FileSystem from './core/file/file-system';
-import Router from './core/route/route';
-import Module from './core/file/file-module';
 import { getFreePort, getJsonFromStr } from './shared/index';
 import minimist from 'minimist';
 import fse from 'fs-extra';
 import path from 'path';
-import Log from './shared/log';
-export default class VMock extends Log {
+import logger from './shared/log';
+import bus from './shared/bus';
+import FileToRoute from './core/file/file-to-route';
+export default class VMock {
   options: Options;
   app: Koa | undefined;
-  fileSystem: any;
-  route: Router;
   serverOptions: ServerOptions;
   ready = false;
-  modules: Module;
+
   argvs = {};
   vbuilderConfig: any;
+  fileToRoute: FileToRoute;
   constructor(options: Options, serverOptions?: ServerOptions) {
-    super();
     this.vbuilderConfig = {
       originFile: '',
       replace: {
         $$_THOR_HOST_$$: {
-          'dev-daily': '//h5.dev.weidian.com:7001',
+          'dev-daily': '//h5.dev.weidian.com:7000',
           'dev-pre': '//thor.pre.weidian.com',
           'dev-prod': '//thor.weidian.com',
         },
@@ -40,15 +37,13 @@ export default class VMock extends Log {
       },
     };
     this.getEnvType();
-    this.modules = new Module(); // 文件模块，route 和 fileSystem 共用的数据
-    this.route = new Router(this.modules); // 生成路由
-    this.fileSystem = new FileSystem(options, this.route, this.modules); // 操作 mock 文件
+    this.fileToRoute = new FileToRoute(options);
     this.options = Object.assign({}, mockConfig.defaultServerConfig, options);
     this.serverOptions = Object.assign({}, serverOptions, mockConfig.defaultServerConfig);
     this.beforeCreateServer();
   }
   server() {
-    this.fileSystem.generateRoutes(); // 初始化路由
+    this.fileToRoute.generateRoutes(); // 初始化路由
     // 中
     getFreePort(this.serverOptions.port)
       .then((port: number) => {
@@ -67,12 +62,12 @@ export default class VMock extends Log {
         this.createServer();
       })
       .catch((error) => {
-        this.error(error);
+        logger.error(error);
       });
   }
   beforeCreateServer() {
     // 路由注册完毕，可以绑定到 app 上
-    this.fileSystem.on('router-ready', () => {
+    bus.on('router-ready', () => {
       this.routerReady();
     });
   }
@@ -82,17 +77,17 @@ export default class VMock extends Log {
 
     this.app.listen(this.serverOptions.port);
     this.routerReady();
-    this.info(`The server is running at http://localhost:${this.serverOptions.port}`);
+    logger.info(`The server is running at http://localhost:${this.serverOptions.port}`);
   }
   routerReady() {
     // 路由注册完毕，可以绑定到 app 上
-    this.info('router ready');
-    this.app && this.route.use(this.app);
+    logger.info('router ready');
+    this.app && this.fileToRoute.use(this.app);
   }
   getEnvType() {
     // 获取运行环境
     this.argvs = minimist(process.argv.slice(2));
-    this.info(`环境参数, ${this.argvs}`);
+    logger.info(`环境参数: ${JSON.stringify(this.argvs)}`);
     this.getDefaultConfig();
   }
   getDefaultConfig() {

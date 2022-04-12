@@ -1,18 +1,17 @@
 import KoaRouter from 'koa-router';
 import Middleware from '../../shared/middleware';
 import RouteFileProcess from './route-file-process';
-import { EventEmitter } from 'events';
 import TsFileCompile from '../compile/ts-file-compile';
 import Module, { FileModule } from '../file/file-module';
 import Koa, { Context, Next } from 'koa';
-export default class Router extends EventEmitter {
+import bus from '../../shared/bus';
+export default class Router {
   router: any;
   methods = ['post', 'get', 'delete'];
   ready: boolean; // 是否准备完毕
   compile: any;
   modules: Module;
   constructor(modules: Module) {
-    super();
     this.ready = false;
     this.modules = modules;
     this.compile = new TsFileCompile();
@@ -38,7 +37,7 @@ export default class Router extends EventEmitter {
       }
     });
     this.ready = true;
-    this.emit('route-ready');
+    bus.emit('router-ready');
   }
   reset() {
     this.router = new KoaRouter();

@@ -2,6 +2,7 @@ import jsf from 'json-schema-faker';
 import { Schema } from 'json-schema-faker';
 import * as ts from 'typescript';
 import typescriptJsonSchema from 'typescript-json-schema';
+import logger from '../../shared/log';
 export default class TsFileCompile {
   jsonSchema = typescriptJsonSchema;
   // faker = jsf
@@ -24,7 +25,11 @@ export default class TsFileCompile {
   compiler(filePath: string, type: string) {
     async function compile(_filePath: string, type: string) {
       let _data = '';
-      _data = await compile.compiler.tsMock(type, _filePath, compile.compiler.compilerOptions);
+      try {
+        _data = await compile.compiler.tsMock(type, _filePath, compile.compiler.compilerOptions);
+      } catch (error) {
+        logger.error(JSON.stringify(error));
+      }
       return {
         data: _data,
       };
