@@ -23,7 +23,9 @@
 `npm i v-mock`
 
 3. 配置
-项目运行根路径下包含 `vbuilder.config.js`
+项目运行根路径下包含 `vbuilder.config.js`。
+
+
 ```js
 module.exports = ({
   userFolder,
