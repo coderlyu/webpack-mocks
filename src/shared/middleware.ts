@@ -1,15 +1,21 @@
 import { Context, Next } from 'koa';
+import logger from './log';
 
-export default async function middleware(ctx: Context, next: Next) {
-  try {
-    if (ctx.method && ctx.method.toLocaleUpperCase() === 'POST') {
-      ctx.set({
-        'Content-Type': 'application/json',
+export default function genMiddleware(headers: any) {
+  return async function middleware(ctx: Context, next: Next) {
+    try {
+      if (ctx.method && ctx.method.toLocaleUpperCase() === 'POST') {
+        ctx.set({
+          'Content-Type': 'application/json',
+        });
+      }
+      // headers
+      Object.keys(headers).forEach((key) => {
+        ctx.set(key, headers[key]);
       });
+      await next();
+    } catch (error) {
+      logger.error(`未匹配到路由, ${JSON.stringify(ctx)}`);
     }
-    await next();
-    // console.log('ctx', ctx);
-  } catch (error) {
-    console.log('未匹配到路由', ctx);
-  }
+  };
 }

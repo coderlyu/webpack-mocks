@@ -15,7 +15,6 @@ export default class VMock {
   app: Koa | undefined;
   serverOptions: ServerOptions;
   ready = false;
-
   argvs = {};
   vbuilderConfig: any;
   fileToRoute: FileToRoute;
@@ -34,17 +33,29 @@ export default class VMock {
           source: 'daily',
           target: '',
         },
+        serverConfig: {},
       },
     };
     this.getEnvType();
-    this.fileToRoute = new FileToRoute(options);
-    this.options = Object.assign({}, mockConfig.defaultServerConfig, options);
-    this.serverOptions = Object.assign({}, serverOptions, mockConfig.defaultServerConfig);
+    this.options = Object.assign(
+      {},
+      mockConfig.defaultServerConfig,
+      options,
+      this.vbuilderConfig.mockConfig.serverConfig,
+      { mockDirName: this.vbuilderConfig.mockConfig.mockDirName },
+    );
+    this.serverOptions = Object.assign(
+      {},
+      serverOptions,
+      mockConfig.defaultServerConfig,
+      this.vbuilderConfig.mockConfig.serverConfig,
+    );
+    this.fileToRoute = new FileToRoute(this.options);
     this.beforeCreateServer();
   }
   server() {
     this.fileToRoute.generateRoutes(); // 初始化路由
-    // 中
+    //
     getFreePort(this.serverOptions.port)
       .then((port: number) => {
         this.serverOptions.port = port;
@@ -81,7 +92,6 @@ export default class VMock {
   }
   routerReady() {
     // 路由注册完毕，可以绑定到 app 上
-    logger.info('router ready');
     this.app && this.fileToRoute.use(this.app);
   }
   getEnvType() {
@@ -113,12 +123,12 @@ export default class VMock {
 
 process.on('unhandledRejection', (error) => {
   // 未处理 promise catch
-  console.log('unhandledRejection', error);
+  console.log('unhandledRejection--', error);
   process.exit(1);
 });
 
 process.on('uncaughtException', (error) => {
   // 未捕获的错误
-  console.log('uncaughtException', error);
+  console.log('uncaughtException--', error);
   process.exit(1);
 });

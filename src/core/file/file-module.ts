@@ -15,9 +15,11 @@ export class FileModule {
   }
   set(file: any) {
     this._file = file;
+    return this;
   }
   setType(type: string) {
     this._type = type;
+    return this;
   }
   get type() {
     return this._type;
@@ -119,5 +121,3 @@ export default class Module {
     return Object.keys(this.relativeMap).filter((_) => !_arr.includes(_));
   }
 }
-
-export type FileModuleName = FileModule | undefined;

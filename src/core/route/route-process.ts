@@ -1,6 +1,7 @@
 import { Context, Next } from 'koa';
 import { FileModule } from '../file/file-module';
 import logger from '../../shared/log';
+import { saveFile } from '../../shared/index';
 export default class RouteFileProcess {
   module: FileModule;
   compile: any;
@@ -91,10 +92,20 @@ export default class RouteFileProcess {
         message: '请求成功',
         result: {
           code: 200,
-          data: _result.data,
+          data: JSON.parse(_result.data),
         },
       };
-      ctx.body = JSON.stringify(result);
+      const strResult = JSON.stringify(result);
+      saveFile(`${this.module.path}.json`, JSON.stringify(JSON.parse(JSON.stringify(result))))
+        .then(() => {
+          // 文件保存成功之后
+          // 更新缓存
+          this.module.set(strResult).setType('json');
+        })
+        .catch(() => {
+          logger.warn('保存文件失败');
+        });
+      ctx.body = strResult;
     } catch (error) {
       logger.error(JSON.stringify(error));
       ctx.status = 400;

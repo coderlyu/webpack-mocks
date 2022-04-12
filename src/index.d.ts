@@ -1,3 +1,4 @@
+import { FileModule } from './core/file/file-module';
 export interface Options {
   userFolder: string; // 项目运行目录，一般为 process.cwd()
   [prop: string]: any;
@@ -15,3 +16,5 @@ export interface CacheFile {
 }
 
 export type FileRoute = Map<string, string>;
+
+export type FileModuleName = FileModule | undefined;

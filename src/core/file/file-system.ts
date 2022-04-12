@@ -1,8 +1,8 @@
-import { Options } from '../../index.d';
+import { Options, FileModuleName } from '../../index.d';
 import path from 'path';
 import fs from 'fs';
 import mockConfig from '../../config';
-import Module, { FileModuleName } from './file-module';
+import Module from './file-module';
 import { relativePathFix } from '../../shared/index';
 import bus from '../../shared/bus';
 import logger from '../../shared/log';
@@ -17,7 +17,7 @@ export default class FileSystem {
   constructor(options: Options, modules: Module) {
     this.options = options;
     this.modules = modules; // 缓存的模块
-    this.mockDir = this.resolve(mockConfig.mockDirName); // mock 目录
+    this.mockDir = this.resolve(options.mockDirName || mockConfig.mockDirName); // mock 目录
     this.watch(); // 监听文件
   }
   generateRoutes(): void {
@@ -36,6 +36,9 @@ export default class FileSystem {
         }
       }
       bus.emit('generateRoutes'); // 生成路由
+    } else {
+      logger.warn(`${this.mockDir} is not a valid directory`);
+      throw new Error(`${this.mockDir} is not a valid directory`);
     }
   }
   resolve(filePath: string, userFolder: string = this.options.userFolder): string {
@@ -72,7 +75,6 @@ export default class FileSystem {
       else this.modules.add(filePath, file, this.relativePath(filePath), type);
     } catch (error) {
       logger.warn(`${filePath} is not a valid file`);
-      logger.error(JSON.stringify(error));
       return undefined;
     }
     return this.modules.get(filePath);
@@ -128,7 +130,7 @@ export default class FileSystem {
   }
   watch() {
     chokidar.watch(this.mockDir, { ignoreInitial: true }).on('all', (event: any, path: any) => {
-      logger.info(`watch, ${event}, ${path}`);
+      logger.info(`${event} -- ${path}`);
       switch (event) {
         case 'change':
           this.fileChange(path);
