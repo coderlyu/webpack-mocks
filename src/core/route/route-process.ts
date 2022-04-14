@@ -2,6 +2,9 @@ import { Context, Next } from 'koa';
 import { FileModule } from '../file/file-module';
 import logger from '../../shared/log';
 import { saveFile } from '../../shared/index';
+interface ParamsName {
+  [props: string]: string | number | boolean | object | undefined | null | any[];
+}
 export default class RouteFileProcess {
   module: FileModule;
   compile: any;
@@ -41,7 +44,19 @@ export default class RouteFileProcess {
     try {
       const fn = this.module.file;
       let data = '';
-      const params = (ctx.body as object) || ctx.query || {};
+      const params: ParamsName = {}
+      const query = ctx.query;
+      const body = ctx.body as any;
+      if (query && typeof query === 'object') {
+        Object.keys(query).forEach(key => {
+          params[key] = query[key];
+        });
+      }
+      if (body && typeof body === 'object') {
+        Object.keys(body).forEach(key => {
+          params[key] = body[key];
+        });
+      }
       switch (typeof fn) {
         case 'object':
           data = fn;

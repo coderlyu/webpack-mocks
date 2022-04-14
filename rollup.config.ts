@@ -19,9 +19,9 @@ export default {
   external: [
     /node_modules/
   ],
-  watch: {
-    include: 'src/**',
-  },
+  // watch: {
+  //   include: 'src/**',
+  // },
   plugins: [
     // Allow json resolution
     json(),

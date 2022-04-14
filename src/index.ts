@@ -97,7 +97,7 @@ export default class VMock {
   getEnvType() {
     // 获取运行环境
     this.argvs = minimist(process.argv.slice(2));
-    logger.info(`环境参数: ${JSON.stringify(this.argvs)}`);
+    // logger.info(`环境参数: ${JSON.stringify(this.argvs)}`);
     this.getDefaultConfig();
   }
   getDefaultConfig() {

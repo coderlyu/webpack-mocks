@@ -1,6 +1,8 @@
 import { FileModule } from './core/file/file-module';
 export interface Options {
   userFolder: string; // 项目运行目录，一般为 process.cwd()
+  port?: number; // 端口号
+  mockDirName?: string; // mock 文件夹名称
   [prop: string]: any;
 }
 

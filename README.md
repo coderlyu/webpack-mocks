@@ -20,9 +20,21 @@
 
 2. 安装
 
-`npm i v-mock`
+`npm i @vdian/v-mock`
 
-3. 配置
+3. 用例
+当前运行项目的地址：`userFolder`，默认是 `process.cwd()`
+```js
+const VMock = require('@vdian/v-mock');
+
+let vmock = new VMock({
+  userFolder: process.cwd(),
+});
+
+vmock.server();
+```
+
+4. 配置（可不需要）
 项目运行根路径下包含 `vbuilder.config.js`。
 
 
@@ -64,17 +76,6 @@ module.exports = ({
 }
 ```
 
-4. 用例
-当前运行项目的地址：`userFolder`，默认是 `process.cwd()`
-```js
-const VMock = require('../dist/index.umd.js');
-
-let vmock = new VMock({
-  userFolder: process.cwd(),
-});
-
-vmock.server();
-```
 
 ## 本地测试
 

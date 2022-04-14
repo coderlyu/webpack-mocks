@@ -1,4 +1,4 @@
-module.exports = function ({page, limit}) {
+module.exports = function ({ page, limit }) {
     console.log(page, limit)
     return {
         "message": "请求成功",
