@@ -44,16 +44,16 @@ export default class RouteFileProcess {
     try {
       const fn = this.module.file;
       let data = '';
-      const params: ParamsName = {}
+      const params: ParamsName = {};
       const query = ctx.query;
-      const body = ctx.body as any;
+      const body = ctx.request.body as any;
       if (query && typeof query === 'object') {
-        Object.keys(query).forEach(key => {
+        Object.keys(query).forEach((key) => {
           params[key] = query[key];
         });
       }
       if (body && typeof body === 'object') {
-        Object.keys(body).forEach(key => {
+        Object.keys(body).forEach((key) => {
           params[key] = body[key];
         });
       }
