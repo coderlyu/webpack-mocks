@@ -55,7 +55,7 @@ export default class VMock {
   }
   server() {
     this.fileToRoute.generateRoutes(); // 初始化路由
-    //
+    // hello world
     getFreePort(this.serverOptions.port)
       .then((port: number) => {
         this.serverOptions.port = port;

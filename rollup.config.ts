@@ -4,24 +4,26 @@ import sourceMaps from 'rollup-plugin-sourcemaps'
 import camelCase from 'lodash.camelcase'
 import typescript from 'rollup-plugin-typescript2'
 import json from 'rollup-plugin-json'
+import { terser } from 'rollup-plugin-terser'
+import livereload from 'rollup-plugin-livereload'
 
+const isProd = process.env.NODE_ENV === 'production'
 const pkg = require('./package.json')
 
 const libraryName = 'index'
-
-export default {
+const config = {
   input: `src/${libraryName}.ts`,
   output: [
-    { file: pkg.main, name: camelCase(libraryName), format: 'umd', sourcemap: true },
-    { file: pkg.module, format: 'es', sourcemap: true }
+    { file: pkg.main, name: camelCase(libraryName), format: 'umd', sourcemap: !isProd },
+    { file: pkg.module, format: 'es', sourcemap: !isProd }
   ],
   // Indicate here external modules you don't wanna include in your bundle (i.e.: 'lodash')
   external: [
     /node_modules/
   ],
-  // watch: {
-  //   include: 'src/**',
-  // },
+  watch: {
+    include: 'src/**',
+  },
   plugins: [
     // Allow json resolution
     json(),
@@ -41,3 +43,12 @@ export default {
     sourceMaps(),
   ],
 }
+
+if(isProd) {
+  config.plugins
+  .push(terser())
+} else {
+  config.plugins.push(livereload())
+}
+
+export default config
