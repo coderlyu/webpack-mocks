@@ -39,7 +39,7 @@ export default class TsFileCompile {
   }
   async tsMock(symbol: any, file: string, compilerOptions: ts.CompilerOptions) {
     const program = ts.createProgram([file], compilerOptions);
-    const schema = this.jsonSchema.generateSchema(program, symbol, this.settings);
+    const schema = this.jsonSchema.generateSchema(program as typescriptJsonSchema.Program, symbol, this.settings);
     const result = await jsf.generate(schema as Schema); // jsonValue to string
     if (schema !== null) return JSON.stringify(result);
     else return '';
