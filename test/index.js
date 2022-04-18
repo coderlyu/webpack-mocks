@@ -1,5 +1,5 @@
 // const VMock = require('../dist/index.umd.js');
-const VMock = require('@vdian/v-mock');
+const VMock = require('../dist/index.umd.js');
 
 let vmock = new VMock({
   userFolder: process.cwd(),

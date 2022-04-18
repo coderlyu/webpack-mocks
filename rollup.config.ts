@@ -1,54 +1,63 @@
-import resolve from 'rollup-plugin-node-resolve'
-import commonjs from 'rollup-plugin-commonjs'
-import sourceMaps from 'rollup-plugin-sourcemaps'
-import camelCase from 'lodash.camelcase'
-import typescript from 'rollup-plugin-typescript2'
-import json from 'rollup-plugin-json'
-import { terser } from 'rollup-plugin-terser'
-import livereload from 'rollup-plugin-livereload'
+import resolve from 'rollup-plugin-node-resolve';
+import commonjs from 'rollup-plugin-commonjs';
+import camelCase from 'lodash.camelcase';
+import typescript from 'rollup-plugin-typescript2';
+import json from 'rollup-plugin-json';
+import { terser } from 'rollup-plugin-terser';
+// import nodePolyfills from 'rollup-plugin-polyfill-node';
 
-const isProd = process.env.NODE_ENV === 'production'
-const pkg = require('./package.json')
+const isProd = process.env.NODE_ENV === 'production';
+const pkg = require('./package.json');
 
-const libraryName = 'index'
+const libraryName = 'index';
 const config = {
   input: `src/${libraryName}.ts`,
-  output: [
-    { file: pkg.main, name: camelCase(libraryName), format: 'umd', sourcemap: !isProd },
-    { file: pkg.module, format: 'es', sourcemap: !isProd }
-  ],
-  // Indicate here external modules you don't wanna include in your bundle (i.e.: 'lodash')
-  external: [
-    /node_modules/
-  ],
-  watch: {
-    include: 'src/**',
+  output: {
+    file: pkg.main,
+    name: camelCase(libraryName),
+    format: 'umd',
+    sourcemap: false,
+    globals: {
+      koa: 'Koa',
+      'koa-bodyparser': 'bodyParser',
+      'koa2-cors': 'KoaCros',
+      portfinder: 'portfinder',
+      'minimist': 'minimist',
+      'fs-extra': 'fse',
+      'log4js': 'log4js',
+      'json-schema-faker': 'jsf',
+      'typescript': 'ts',
+      'typescript-json-schema': 'typescriptJsonSchema'
+    },
   },
-  plugins: [
-    // Allow json resolution
-    json(),
-    // Compile TypeScript files
-    typescript({ useTsconfigDeclarationDir: true }),
-    // Allow bundling cjs modules (unlike webpack, rollup doesn't understand cjs)
-    commonjs(),
-    // Allow node_modules resolution, so you can use 'external' to control
-    // which external modules to include in the bundle
-    // https://github.com/rollup/rollup-plugin-node-resolve#usage
-    resolve({
-        browser: true,
-        preferBuiltins: true
-    }),
-
-    // Resolve source maps to the original source
-    sourceMaps(),
+  external: [
+    'fs-extra',
+    'portfinder',
+    'log4js',
+    'typescript',
+    'koa',
+    'koa-bodyparser',
+    'koa2-cors',
+    'minimist',
+    'json-schema-faker',
+    'typescript-json-schema',
   ],
-}
+  plugins: [
+    json(),
+    typescript({ useTsconfigDeclarationDir: true }),
+    // nodePolyfills(),
+    resolve({
+      browser: false,
+      preferBuiltins: true,
+    }),
+    commonjs(),
+  ],
+};
 
-if(isProd) {
-  config.plugins
-  .push(terser())
+if (isProd) {
+  config.plugins.push(terser());
 } else {
-  config.plugins.push(livereload())
+  // config.plugins.push(livereload());
 }
 
-export default config
+export default config;
