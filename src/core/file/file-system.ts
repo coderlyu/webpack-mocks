@@ -1,7 +1,7 @@
-import { Options, FileModuleName } from '../../index.d';
+import { Options, FileModuleName } from '../../types';
 import path from 'path';
 // import fs from 'fs';
-import fse from 'fs-extra';
+import fse from 'fs';
 import mockConfig from '../../config';
 import Module from './file-module';
 import { relativePathFix } from '../../shared/index';

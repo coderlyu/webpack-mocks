@@ -23,7 +23,6 @@ const config = {
       'koa2-cors': 'KoaCros',
       portfinder: 'portfinder',
       'minimist': 'minimist',
-      'fs-extra': 'fse',
       'log4js': 'log4js',
       'json-schema-faker': 'jsf',
       'typescript': 'ts',
@@ -31,7 +30,6 @@ const config = {
     },
   },
   external: [
-    'fs-extra',
     'portfinder',
     'log4js',
     'typescript',

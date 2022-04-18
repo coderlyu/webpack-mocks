@@ -5,7 +5,7 @@ import TsFileCompile from '../compile/ts-file-compile';
 import Module, { FileModule } from '../file/file-module';
 import Koa, { Context, Next } from 'koa';
 import bus from '../../shared/bus';
-import { Options } from '../../index.d';
+import { Options } from '../../types';
 export default class Router {
   router: any;
   methods = ['post', 'get', 'delete'];

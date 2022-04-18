@@ -4,7 +4,7 @@ import { EventEmitter } from 'events';
 import Koa from 'koa';
 import bus from '../../shared/bus';
 import Module from './file-module';
-import { Options } from '../../index.d';
+import { Options } from '../../types';
 export default class FileToRoute extends EventEmitter {
   fileSystem: FileSystem;
   router: Router;

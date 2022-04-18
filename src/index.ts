@@ -1,11 +1,11 @@
-import { Options, ServerOptions } from './index.d';
+import { Options, ServerOptions } from './types';
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import KoaCros from 'koa2-cors';
 import mockConfig from './config';
 import { getFreePort, getJsonFromStr } from './shared/index';
 import minimist from 'minimist';
-import fse from 'fs-extra';
+import fse from 'fs';
 import path from 'path';
 import logger from './shared/log';
 import bus from './shared/bus';
