@@ -88,7 +88,10 @@ export default class VMock {
 
     this.app.listen(this.serverOptions.port);
     this.routerReady();
-    logger.info(`The server is running at http://localhost:${this.serverOptions.port}`);
+    logger.info(`The server is running at \x1B[32mhttp://127.0.0.1:${this.serverOptions.port}\x1B[0m\n`);
+    console.log('\x1B[32m[mock]: mock 服务启动成功\x1B[0m')
+    console.log(`    访问 mock 文件的方式不带 .json(.js|.ts) 路径:`);
+    console.log(`    案例 1: \x1B[32mhttp://127.0.0.1:${this.serverOptions.port}/api/list/1.0\x1B[0m`);
   }
   routerReady() {
     // 路由注册完毕，可以绑定到 app 上

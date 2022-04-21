@@ -5,14 +5,14 @@ configure({
       type: 'console',
       layout: {
         type: 'pattern',
-        pattern: '[%[%p%]]-%d{yyyy/MM/dd-hh:mm:ss}： %m',
+        pattern: '[%[%p%]]-%d{hh:mm:ss}： %m',
       },
     },
   },
   categories: { default: { appenders: ['vMock'], level: 'info' } },
 });
 class Log {
-  logger: Logger;
+  private logger: Logger;
   constructor() {
     this.logger = getLogger(); // 获取实例
   }

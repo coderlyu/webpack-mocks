@@ -22,24 +22,29 @@ export default class FileSystem {
     this.watch(); // 监听文件
   }
   generateRoutes(): void {
-    if (this.options.userFolder && this.isDir(this.mockDir)) {
-      if (!this.isExistsFile(this.mockDir)) return;
-      let dirs = fse.readdirSync(this.mockDir).map((p) => this.resolve(p, this.mockDir));
-      while (dirs.length > 0) {
-        let _path = dirs.shift();
-        if (!_path) continue;
-        if (this.isDir(_path)) {
-          // 是文件夹
-          dirs = dirs.concat(fse.readdirSync(_path).map((p) => this.resolve(p, _path)));
-        } else {
-          // 是文件
-          this.readFileByOrder(_path); // 读取文件并缓存
+    try {
+      if (this.options.userFolder) {
+        if (!this.isDir(this.mockDir)) {
+          fse.mkdirSync(this.mockDir)
         }
+        if (!this.isExistsFile(this.mockDir)) return;
+        let dirs = fse.readdirSync(this.mockDir).map((p) => this.resolve(p, this.mockDir));
+        while (dirs.length > 0) {
+          let _path = dirs.shift();
+          if (!_path) continue;
+          if (this.isDir(_path)) {
+            // 是文件夹
+            dirs = dirs.concat(fse.readdirSync(_path).map((p) => this.resolve(p, _path)));
+          } else {
+            // 是文件
+            this.readFileByOrder(_path); // 读取文件并缓存
+          }
+        }
+        bus.emit('generateRoutes'); // 生成路由
       }
-      bus.emit('generateRoutes'); // 生成路由
-    } else {
-      logger.warn(`${this.mockDir} is not a valid directory`);
-      throw new Error(`${this.mockDir} is not a valid directory`);
+    } catch (error) {
+      logger.warn(JSON.stringify(error))
+      throw new Error(JSON.stringify(error));
     }
   }
   resolve(filePath: string, userFolder: string = this.options.userFolder): string {
