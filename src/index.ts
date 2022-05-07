@@ -48,8 +48,11 @@ export default class VMock {
       {},
       serverOptions,
       mockConfig.defaultServerConfig,
-      this.vbuilderConfig.mockConfig.serverConfig,
+      this.vbuilderConfig.mockConfig.serverConfig
     );
+    if (options.port) {
+      this.serverOptions.port = options.port
+    }
     this.fileToRoute = new FileToRoute(this.options);
     this.beforeCreateServer();
   }
