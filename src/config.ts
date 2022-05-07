@@ -16,4 +16,26 @@ export default {
     headers: {}, // 默认头部
   },
   envType: ['daily', 'pre'],
+  httpsConfig: {
+    https: false,
+    force: false,
+    domain: ''
+  },
+  vbuilderConfig: {
+    originFile: '',
+    replace: {
+      $$_THOR_HOST_$$: {
+        'dev-daily': '//h5.dev.weidian.com:7000',
+        'dev-pre': '//thor.pre.weidian.com',
+        'dev-prod': '//thor.weidian.com',
+      },
+    },
+    mockConfig: {
+      proxy: {
+        source: 'daily',
+        target: '',
+      },
+      serverConfig: {},
+    },
+  }
 };

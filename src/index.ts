@@ -1,4 +1,4 @@
-import { Options, ServerOptions } from './types';
+import { Options, ServerOptions, HttpsConfigName } from './types';
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import KoaCros from 'koa2-cors';
@@ -10,6 +10,9 @@ import path from 'path';
 import logger from './shared/log';
 import bus from './shared/bus';
 import FileToRoute from './core/file/file-to-route';
+import config from './config';
+import https from 'https'
+import enforceHttps from 'koa-sslify'
 export default class VMock {
   options: Options;
   app: Koa | undefined;
@@ -18,25 +21,12 @@ export default class VMock {
   argvs = {};
   vbuilderConfig: any;
   fileToRoute: FileToRoute;
+  httpsConfig: HttpsConfigName
+  https = false // 是否使用 https，搭配 httpsConfig 使用
   constructor(options: Options, serverOptions?: ServerOptions) {
-    this.vbuilderConfig = {
-      originFile: '',
-      replace: {
-        $$_THOR_HOST_$$: {
-          'dev-daily': '//h5.dev.weidian.com:7000',
-          'dev-pre': '//thor.pre.weidian.com',
-          'dev-prod': '//thor.weidian.com',
-        },
-      },
-      mockConfig: {
-        proxy: {
-          source: 'daily',
-          target: '',
-        },
-        serverConfig: {},
-      },
-    };
-    this.getEnvType();
+    this.vbuilderConfig = config.vbuilderConfig
+    this.httpsConfig = Object.assign({}, config.httpsConfig, { force: options.force, })
+    this.getEnvType(); // 获取配置文件，https
     this.options = Object.assign(
       {},
       mockConfig.defaultServerConfig,
@@ -50,8 +40,15 @@ export default class VMock {
       mockConfig.defaultServerConfig,
       this.vbuilderConfig.mockConfig.serverConfig
     );
+    // 优先规则： options > 配置文件
     if (options.port) {
       this.serverOptions.port = options.port
+    }
+    if (options.https) {
+      this.https = options.https
+    }
+    if (options.domain) {
+      this.httpsConfig.domain = options.domain
     }
     this.fileToRoute = new FileToRoute(this.options);
     this.beforeCreateServer();
@@ -85,16 +82,28 @@ export default class VMock {
       this.routerReady();
     });
   }
-  createServer() {
+  async createServer() {
     this.app = new Koa();
     this.app.use(KoaCros(mockConfig.corsHandler)).use(bodyParser());
-
-    this.app.listen(this.serverOptions.port);
+    if (this.https) {
+      // 创建 https 服务器
+      this.app.use(enforceHttps())
+      const ssl = await require('devcert').certificateFor(this.httpsConfig.domain, { getCaPath: true });
+      const { key, cert } = ssl
+      https.createServer({ key, cert }, this.app.callback()).listen(this.serverOptions.port, (err: any) => {
+        if (err) {
+          throw new Error(JSON.stringify(err))
+        }
+      })
+      logger.info(`\x1B[32m可能需要输入本机密码以启动 https mock 功能\x1B[0m`);
+    } else {
+      this.app.listen(this.serverOptions.port);
+    }
     this.routerReady();
-    logger.info(`The server is running at \x1B[32mhttp://127.0.0.1:${this.serverOptions.port}\x1B[0m\n`);
+    logger.info(`The server is running at \x1B[32m${this.https ? 'https' : 'http'}://127.0.0.1:${this.serverOptions.port}\x1B[0m\n`);
     console.log('\x1B[32m[mock]: mock 服务启动成功\x1B[0m')
     console.log(`    访问 mock 文件的方式不带 .json(.js|.ts) 路径:`);
-    console.log(`    案例 1: \x1B[32mhttp://127.0.0.1:${this.serverOptions.port}/api/list/1.0\x1B[0m`);
+    console.log(`    案例 1: \x1B[32m${this.https ? 'https' : 'http'}://127.0.0.1:${this.serverOptions.port}/api/list/1.0\x1B[0m`);
   }
   routerReady() {
     // 路由注册完毕，可以绑定到 app 上
@@ -120,6 +129,8 @@ export default class VMock {
       config.replace = getJsonFromStr(config.originFile, 'replace:');
       // 解析 mockProxy 对象
       config.mockConfig = getJsonFromStr(config.originFile, 'mockConfig:');
+      const https = getJsonFromStr(config.originFile, 'https')
+      this.httpsConfig.domain = https.domain || this.httpsConfig.domain
       this.vbuilderConfig.originFile = config.originFile || this.vbuilderConfig.originFile;
       this.vbuilderConfig.replace = config.replace || this.vbuilderConfig.replace;
       this.vbuilderConfig.mockConfig = config.mockConfig || this.vbuilderConfig.mockConfig;
