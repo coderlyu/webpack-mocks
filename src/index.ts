@@ -25,7 +25,7 @@ export default class VMock {
   https = false // 是否使用 https，搭配 httpsConfig 使用
   constructor(options: Options, serverOptions?: ServerOptions) {
     this.vbuilderConfig = config.vbuilderConfig
-    this.httpsConfig = Object.assign({}, config.httpsConfig, { force: options.force, })
+    this.httpsConfig = Object.assign({}, config.httpsConfig, { force: options.force })
     this.getEnvType(); // 获取配置文件，https
     this.options = Object.assign(
       {},
@@ -100,10 +100,10 @@ export default class VMock {
       this.app.listen(this.serverOptions.port);
     }
     this.routerReady();
-    logger.info(`The server is running at \x1B[32m${this.https ? 'https' : 'http'}://127.0.0.1:${this.serverOptions.port}\x1B[0m\n`);
+    logger.info(`The server is running at \x1B[32m${this.https ? 'https' : 'http'}://${this.https ? this.httpsConfig.domain : '127.0.0.1'}:${this.serverOptions.port}\x1B[0m\n`);
     console.log('\x1B[32m[mock]: mock 服务启动成功\x1B[0m')
     console.log(`    访问 mock 文件的方式不带 .json(.js|.ts) 路径:`);
-    console.log(`    案例 1: \x1B[32m${this.https ? 'https' : 'http'}://127.0.0.1:${this.serverOptions.port}/api/list/1.0\x1B[0m`);
+    console.log(`    案例 1: \x1B[32m${this.https ? 'https' : 'http'}://${this.https ? this.httpsConfig.domain : '127.0.0.1'}:${this.serverOptions.port}/api/list/1.0\x1B[0m`);
   }
   routerReady() {
     // 路由注册完毕，可以绑定到 app 上
