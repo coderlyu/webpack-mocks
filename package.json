@@ -1,6 +1,6 @@
 {
   "name": "@vdian/v-mock",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "mock data for vbuilder",
   "main": "dist/index.umd.js",
   "typings": "dist/types/index.d.ts",
