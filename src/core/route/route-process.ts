@@ -1,7 +1,7 @@
 import { Context, Next } from 'koa';
 import { FileModule } from '../file/file-module';
 import logger from '../../shared/log';
-import { saveFile } from '../../shared/index';
+import { saveFile, str2Json } from '../../shared/index';
 interface ParamsName {
   [props: string]: string | number | boolean | object | undefined | null | any[];
 }
@@ -44,17 +44,17 @@ export default class RouteFileProcess {
     try {
       const fn = this.module.file;
       let data = '';
-      const params: ParamsName = {};
+      const params: ParamsName = { };
       const query = ctx.query;
       const body = ctx.request.body as any;
       if (query && typeof query === 'object') {
         Object.keys(query).forEach((key) => {
-          params[key] = query[key];
+          params[key] = str2Json(query[key]);
         });
       }
       if (body && typeof body === 'object') {
         Object.keys(body).forEach((key) => {
-          params[key] = body[key];
+          params[key] = str2Json(body[key]);
         });
       }
       switch (typeof fn) {

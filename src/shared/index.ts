@@ -122,3 +122,17 @@ export function getJsonFromStr(str: string, target: string) {
   }
   return '';
 }
+
+/**
+ * 字符串 转 对象
+ * @param str 
+ * @returns 
+ */
+export function str2Json(str: any) {
+  let result = str
+  try {
+    result = JSON.parse(str)
+  } catch (error) {
+  }
+  return result
+}

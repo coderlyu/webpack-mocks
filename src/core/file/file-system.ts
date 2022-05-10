@@ -150,7 +150,7 @@ export default class FileSystem {
   }
   watch() {
     chokidar.watch(this.mockDir, { ignoreInitial: true }).on('all', (event: any, path: any) => {
-      logger.info(`${event} -- ${path}`);
+      // logger.info(`${event} -- ${path}`);
       switch (event) {
         case 'change':
           this.fileChange(path);

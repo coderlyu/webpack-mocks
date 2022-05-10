@@ -1,5 +1,6 @@
-module.exports = function (...args) {
+module.exports = function (args) {
   console.log('args', args);
+  console.log(args.param.sort)
   return {
     status: { code: 0, message: 'OK', description: '' },
     result: {

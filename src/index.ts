@@ -124,11 +124,20 @@ export default class VMock {
     };
     const filePath = path.resolve(process.cwd(), 'vbuilder.config.js');
     if (fse.existsSync(filePath)) {
-      config.originFile = fse.readFileSync(filePath).toString();
+      const data = fse.readFileSync(filePath, 'utf-8');
+      // 处理注释，如果当前行是义 // 开头的，就删除
+      const lines = data.split(/\r?\n/)
+      const remarkStartReg = /^\s*\/\//g
+      const remarkEndReg = /\/\/\s.*?$/g
+      config.originFile = lines.filter((line) => !remarkStartReg.test(line)).map((line) => {
+        if (remarkEndReg.test(line)) return line.replace(remarkEndReg, ' ')
+        return line
+      }).join(' ')
       // 解析 replace 对象
       config.replace = getJsonFromStr(config.originFile, 'replace:');
       // 解析 mockProxy 对象
       config.mockConfig = getJsonFromStr(config.originFile, 'mockConfig:');
+      // 解析 https 对象
       const https = getJsonFromStr(config.originFile, 'https')
       this.httpsConfig.domain = https.domain || this.httpsConfig.domain
       this.vbuilderConfig.originFile = config.originFile || this.vbuilderConfig.originFile;
