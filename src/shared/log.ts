@@ -1,20 +1,31 @@
 import { configure, getLogger, Logger } from 'log4js';
 configure({
   appenders: {
-    vMock: {
+    general: {
+      // 打印一般信息
       type: 'console',
       layout: {
         type: 'pattern',
         pattern: '[%[%p%]]-%d{hh:mm:ss}： %m',
       },
     },
+    error: {
+      // 打印堆栈信息
+      type: 'console',
+      layout: {
+        type: 'pattern',
+        pattern: '[%[%p%]]-%d{hh:mm:ss}： %m\n%s',
+      },
+    }
   },
-  categories: { default: { appenders: ['vMock'], level: 'info' } },
+  categories: { default: { appenders: ['general'], level: 'info' }, error: { appenders: ['error'], level: 'info', enableCallStack: true } },
 });
 class Log {
   private logger: Logger;
+  private loggerE: Logger
   constructor() {
-    this.logger = getLogger(); // 获取实例
+    this.logger = getLogger('default'); // 获取实例
+    this.loggerE = getLogger('error')
   }
   debug(message: string) {
     this.logger.debug(message);
@@ -26,8 +37,7 @@ class Log {
     this.logger.warn(message);
   }
   error(message: string) {
-    console.error(message);
-    this.logger.error(message);
+    this.loggerE.error(message);
   }
 }
 

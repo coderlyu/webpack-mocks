@@ -1,162 +1,177 @@
-module.exports = function (args) {
-  console.log('args', args);
-  console.log(args.param.sort)
-  return {
-    status: { code: 0, message: 'OK', description: '' },
-    result: {
-      canFreePublish: true,
-      config: {
-        barText: '恭喜你获得闲置转卖内测资格～',
-        barUrl: 'https://vmspub.weidian.com/gaia/52032/85c5f78c.html',
-        titleIcon: 'https://si.geilicdn.com/img-5dc90000017aec76e5060a211500-unadjust_99_36.png',
-      },
-      currentUserInfo: {
-        avatar: 'https://si.geilicdn.com/login573027357-66d000000177f2e626870a21c2a7_941_914.jpg',
-        name: '吧啦吧啦小魔仙',
-        realName: false,
-        resellItemNum: 11,
-        resellItemTotalPrice: 11,
-        userId: '573027357',
-      },
-      hasNext: true,
-      hasRisk: false,
-      items: [
-        {
-          buyerId: '573027357',
-          canResell: true,
-          content: '23',
-          coverImage: 'https://si.geilicdn.com/follow827203525-56fa0000017ad196ef3a0a201e24-unadjust_1125_2001.png',
-          desiredNum: 0,
-          image: 'https://si.geilicdn.com/wdseller827203525-29910000017ae1c268060a201e24_1434_1074.jpg',
-          incrementSubscribeNum: 0,
-          itemId: '1922384974',
-          itemResellInfo: '1件商品可转卖',
-          joinPoolDate: 1637596800000,
-          latestRecord: false,
-          orderId: '813682535941307',
-          payTime: 1606910216000,
-          price: 1,
-          quantity: 1,
-          sellerId: '827203525',
-          subOrderId: '615929764463803',
-          title: '【勿删】测试下单商品',
-          vid: '6ffb7c179a4b49ba016ed593636e6e6e23',
-          video: 'https://v.geilicdn.com/video/follow827203525-57330000017ad196e6ae0a21dd2d_720_1280.mp4',
-          videoStatus: 1,
+module.exports = function ({ param: obj }) {
+  // console.log(obj)
+  // const obj = JSON.parse(options.param)
+
+  let res = { name : '' }
+  // console.log('-----', obj.keyword)
+  switch (obj.keyword) {
+    case '推荐':
+      // console.log(obj.keyword)
+      res = {
+        status: {
+          code: 0,
+          message: 'OK',
+          description: ''
         },
-        {
-          buyerId: '573027357',
-          canResell: true,
-          content: '23',
-          coverImage: 'https://si.geilicdn.com/follow827203525-56fa0000017ad196ef3a0a201e24-unadjust_1125_2001.png',
-          desiredNum: 0,
-          image: 'https://si.geilicdn.com/wdseller827203525-29910000017ae1c268060a201e24_1434_1074.jpg',
-          incrementSubscribeNum: 0,
-          itemId: '1922384974',
-          itemResellInfo: '1件商品可转卖',
-          joinPoolDate: 1637596800000,
-          latestRecord: false,
-          orderId: '813678360503483',
-          payTime: 1606910243000,
-          price: 1,
-          quantity: 1,
-          sellerId: '827203525',
-          subOrderId: '615929399952571',
-          title: '【勿删】测试下单商品',
-          vid: '6ffb7c179a4b49ba016ed593636e6e6e23',
-          video: 'https://v.geilicdn.com/video/follow827203525-57330000017ad196e6ae0a21dd2d_720_1280.mp4',
-          videoStatus: 1,
-        },
-        {
-          buyerId: '573027357',
-          canResell: true,
-          content: '23',
-          coverImage: 'https://si.geilicdn.com/follow827203525-56fa0000017ad196ef3a0a201e24-unadjust_1125_2001.png',
-          desiredNum: 0,
-          image: 'https://si.geilicdn.com/wdseller827203525-29910000017ae1c268060a201e24_1434_1074.jpg',
-          incrementSubscribeNum: 0,
-          itemId: '1922384974',
-          itemResellInfo: '1件商品可转卖',
-          joinPoolDate: 1637596800000,
-          latestRecord: false,
-          orderId: '813678158881979',
-          payTime: 1606909221000,
-          price: 1,
-          quantity: 1,
-          sellerId: '827203525',
-          subOrderId: '615925699617979',
-          title: '【勿删】测试下单商品',
-          vid: '6ffb7c179a4b49ba016ed593636e6e6e23',
-          video: 'https://v.geilicdn.com/video/follow827203525-57330000017ad196e6ae0a21dd2d_720_1280.mp4',
-          videoStatus: 1,
-        },
-        {
-          buyerId: '573027357',
-          canResell: true,
-          content: '23',
-          coverImage: 'https://si.geilicdn.com/follow827203525-56fa0000017ad196ef3a0a201e24-unadjust_1125_2001.png',
-          desiredNum: 0,
-          image: 'https://si.geilicdn.com/wdseller827203525-29910000017ae1c268060a201e24_1434_1074.jpg',
-          incrementSubscribeNum: 0,
-          itemId: '1922384974',
-          itemResellInfo: '1件商品可转卖',
-          joinPoolDate: 1637596800000,
-          latestRecord: false,
-          orderId: '813678213129403',
-          payTime: 1606910279000,
-          price: 1,
-          quantity: 1,
-          sellerId: '827203525',
-          subOrderId: '615925992318139',
-          title: '【勿删】测试下单商品',
-          vid: '6ffb7c179a4b49ba016ed593636e6e6e23',
-          video: 'https://v.geilicdn.com/video/follow827203525-57330000017ad196e6ae0a21dd2d_720_1280.mp4',
-          videoStatus: 1,
-        },
-        {
-          buyerId: '573027357',
-          canResell: true,
-          content: '23',
-          coverImage: 'https://si.geilicdn.com/follow827203525-56fa0000017ad196ef3a0a201e24-unadjust_1125_2001.png',
-          desiredNum: 0,
-          image: 'https://si.geilicdn.com/wdseller827203525-29910000017ae1c268060a201e24_1434_1074.jpg',
-          incrementSubscribeNum: 0,
-          itemId: '1922384974',
-          itemResellInfo: '1件商品可转卖',
-          joinPoolDate: 1637596800000,
-          latestRecord: false,
-          orderId: '813678060594363',
-          payTime: 1606909256000,
-          price: 1,
-          quantity: 1,
-          sellerId: '827203525',
-          subOrderId: '615926076466363',
-          title: '【勿删】测试下单商品',
-          vid: '6ffb7c179a4b49ba016ed593636e6e6e23',
-          video: 'https://v.geilicdn.com/video/follow827203525-57330000017ad196e6ae0a21dd2d_720_1280.mp4',
-          videoStatus: 1,
-        },
-        {
-          buyerId: '573027357',
-          canResell: true,
-          desiredNum: 0,
-          image: 'https://si.geilicdn.com/wdseller827203525-0a62000001705757503c0a217216_2560_1182.jpg',
-          incrementSubscribeNum: 0,
-          itemId: '3329104384',
-          itemResellInfo: '1件商品可转卖',
-          joinPoolDate: 1637596800000,
-          latestRecord: false,
-          orderId: '813801455576251',
-          payTime: 1608633476000,
-          price: 1,
-          quantity: 1,
-          sellerId: '827203525',
-          subOrderId: '616128673399995',
-          title: '吃鸡',
-        },
-      ],
-      topPic: 'https://si.geilicdn.com/img-572e0000017f683e3a7f0a20e284-unadjust_750_223.png',
-      total: 15,
-    },
-  };
-};
+        result: {
+          activityList: [
+            {
+              name: '萨阿设计大赛看懂',
+              tip: '',
+              joinNum: 100,
+              joiners: [
+                {
+                  nickName: '',
+                  headImage: ''
+                }
+              ],
+              auth: '',
+              backgroundColor: '#fff',
+              tagList: [
+                {
+                  data: '每日瓜分红包',
+                  name: 'activity_tag', // 活动标
+                  color: '#ffffff' //颜色
+                }
+              ],
+              joinStatus: 0
+            },
+            {
+              name: '萨阿设计大赛看懂',
+              tip: '',
+              joinNum: 100,
+              joiners: [
+                {
+                  nickName: '',
+                  headImage: ''
+                }
+              ],
+              auth: '',
+              backgroundColor: '#fff',
+              tagList: [
+                {
+                  data: '题库更新',
+                  name: 'question_update', // 题库更新标
+                  color: '#ffffff' //颜色
+                }
+              ],
+              joinStatus: 0
+            },
+            {
+              name: '萨阿设计大赛看懂倒计时的发i哦地方i',
+              tip: '',
+              joinNum: 100,
+              joiners: [
+                {
+                  nickName: '',
+                  headImage: ''
+                }
+              ],
+              auth: '',
+              backgroundColor: '#fff',
+              tagList: [
+                {
+                  data: '新赛道',
+                  name: 'track_add', // 赛道新增标
+                  color: '#ffffff' //颜色
+                }
+              ],
+              joinStatus: 0
+            },
+            {
+              name: '萨阿设计大赛看懂',
+              tip: '',
+              joinNum: 100,
+              joiners: [
+                {
+                  nickName: '',
+                  headImage: ''
+                }
+              ],
+              auth: '',
+              backgroundColor: '#fff',
+              tagList: [{}],
+              joinStatus: 0
+            },
+            {
+              name: '设计大赛看懂',
+              tip: '',
+              joinNum: 100,
+              joiners: [
+                {
+                  nickName: '',
+                  headImage: ''
+                }
+              ],
+              auth: '',
+              backgroundColor: '#fff',
+              tagList: [{}],
+              joinStatus: 0
+            },
+            {
+              name: '萨阿设计大赛看懂',
+              tip: '',
+              joinNum: 100,
+              joiners: [
+                {
+                  nickName: '',
+                  headImage: ''
+                }
+              ],
+              auth: '',
+              backgroundColor: '#fff',
+              tagList: [{}],
+              joinStatus: 0
+            },
+            {
+              name: '萨阿设计大赛看懂',
+              tip: '',
+              joinNum: 100,
+              joiners: [
+                {
+                  nickName: '',
+                  headImage: ''
+                }
+              ],
+              auth: '',
+              backgroundColor: '#fff',
+              tagList: [{}],
+              joinStatus: 0
+            },
+            {
+              name: '萨阿设计大赛看懂',
+              tip: '',
+              joinNum: 100,
+              joiners: [
+                {
+                  nickName: '',
+                  headImage: ''
+                }
+              ],
+              auth: '',
+              backgroundColor: '#fff',
+              tagList: [{}],
+              joinStatus: 0
+            }
+          ]
+        }
+      }
+      break
+    case '影视综艺':
+
+      break
+    case '韩国综艺':
+
+      break
+    default:
+      res = {
+        status: {
+          code: 0,
+          message: 'OK',
+          description: ''
+        }
+      }
+      break
+  }
+  return res
+}
