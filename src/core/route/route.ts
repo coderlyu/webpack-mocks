@@ -32,8 +32,8 @@ export default class Router {
       if (module) {
         const process = new RouteFileProcess(this.compile, module);
         this.methods.forEach((method) => {
-          const pathArr = this.router.match(this.routerPath(module), method.toUpperCase()).pathAndMethod || []
-          if (pathArr.length === 0) // 防止多次注册同一个路由
+          const matched = this.router.match(this.routerPath(module), method.toUpperCase()).route || false
+          if (!matched) // 防止多次注册同一个路由
             this.router[method](
               this.routerPath(module),
               async (ctx: Context, next: Next) => await process.handle(ctx, next),
