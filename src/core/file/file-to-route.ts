@@ -21,7 +21,7 @@ export default class FileToRoute extends EventEmitter {
   generateRoutes() {
     this.fileSystem.generateRoutes();
   }
-  use(app: Koa) {
-    this.router.use(app);
+  use(app: Koa, host?: string, port?: number, https?: boolean) {
+    this.router.use(app, host, port, https);
   }
 }

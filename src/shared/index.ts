@@ -1,4 +1,5 @@
 import portfinder from 'portfinder';
+import { Context } from 'koa'
 export * from './file';
 export * from './path';
 /**
@@ -135,4 +136,30 @@ export function str2Json(str: any) {
   } catch (error) {
   }
   return result
+}
+
+/**
+ * 
+ * @param {*} ctx 
+ * @param {*} delay 超时时间
+ * @returns 
+ */
+export function watchCtxStatus (ctx: Context, delay = 5000) {
+  let timer = null
+  let startTime = +new Date()
+  let endTime = startTime
+  function createTimer (resolve: (value?: unknown) => void) {
+      return setTimeout(() => {
+          endTime = +new Date()
+          if (endTime - startTime > delay || ctx.response.status === 200) {
+              resolve()
+              timer = null
+          } else {
+              timer = createTimer(resolve)
+          }
+      }, 16);
+  }
+  return new Promise((resolve) => {
+      timer = createTimer(resolve)
+  })
 }

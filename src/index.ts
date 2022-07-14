@@ -18,12 +18,13 @@ export default class VMock {
   app: Koa | undefined;
   serverOptions: ServerOptions;
   ready = false;
-  argvs = {};
+  argvs: { [props:string]: any };
   vbuilderConfig: any;
   fileToRoute: FileToRoute;
   httpsConfig: HttpsConfigName
   https = false // 是否使用 https，搭配 httpsConfig 使用
   constructor(options: Options, serverOptions?: ServerOptions) {
+    this.argvs = {}
     this.vbuilderConfig = config.vbuilderConfig
     this.httpsConfig = Object.assign({}, config.httpsConfig, { force: options.force })
     this.getEnvType(); // 获取配置文件，https
@@ -107,12 +108,23 @@ export default class VMock {
   }
   routerReady() {
     // 路由注册完毕，可以绑定到 app 上
-    this.app && this.fileToRoute.use(this.app);
+    let domain = ''
+    let port = this.serverOptions.port
+    if (this.https) {
+      port = this.httpsConfig.port || 443
+      domain = this.httpsConfig.domain || 'h5.dev.weidian.com'
+    }
+    this.app && this.fileToRoute.use(this.app, domain, port, this.https);
   }
   getEnvType() {
     // 获取运行环境
-    this.argvs = minimist(process.argv.slice(2));
-    // logger.info(`环境参数: ${JSON.stringify(this.argvs)}`);
+    // this.argvs = minimist(this.options.rawArgs.slice(2));
+    // let prefix = ''
+    // Object.keys(config.envs).forEach((key) => {
+    //   if (this.argvs[key]) {
+    //     prefix = key
+    //   }
+    // })
     this.getDefaultConfig();
   }
   getDefaultConfig() {
@@ -140,6 +152,7 @@ export default class VMock {
       // 解析 https 对象
       const https = getJsonFromStr(config.originFile, 'https')
       this.httpsConfig.domain = https.domain || this.httpsConfig.domain
+      this.httpsConfig.port = https.port || this.httpsConfig.domain
       this.vbuilderConfig.originFile = config.originFile || this.vbuilderConfig.originFile;
       this.vbuilderConfig.replace = config.replace || this.vbuilderConfig.replace;
       this.vbuilderConfig.mockConfig = config.mockConfig || this.vbuilderConfig.mockConfig;

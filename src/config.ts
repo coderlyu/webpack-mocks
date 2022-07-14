@@ -19,7 +19,8 @@ export default {
   httpsConfig: {
     https: false,
     force: false,
-    domain: ''
+    domain: '',
+    port: 443
   },
   vbuilderConfig: {
     originFile: '',
@@ -37,5 +38,13 @@ export default {
       },
       serverConfig: {},
     },
+  },
+  envs: {
+    'dev-daily': 'dev-daily',
+    'dev-pre': 'dev-pre',
+    'dev-prod': 'dev-prod',
+    'build-daily': 'build-daily',
+    'build-pre': 'build-pre',
+    'build-prod': 'build-prod'
   }
 };

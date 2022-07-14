@@ -128,13 +128,14 @@ module.exports = ({
         // 请求额外返回的头部 --- 全局
         headers: {}
       }
-    }
+    },
     // 启用 rpx 单位的适配方案
     // 启动 rem 转为 rpx
     // remToRpx: true,
-    // https: {
-    //     domain: "h5.dev.weidian.com" // 本地开发域名
-    // },
+    https: {
+        domain: "h5.dev.weidian.com", // 本地开发域名
+        port: 443, // 本地开发端口
+    },
   }
 }
 

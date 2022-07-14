@@ -6,7 +6,7 @@ let vmock = new VMock({
   port: 7000,
   force: false,
   domain: 'h5.dev.weidian.com',
-  https: false
+  https: true
 });
 
 vmock.server();
